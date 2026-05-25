@@ -49,12 +49,15 @@ public class Scene1manage : MonoBehaviour
     private bool isFlickering = false;
 
 
-    void Start()
+    IEnumerator Start()
     {
+        Debug.Log("starting");
         currentPhase = GamePhase.Phase0_Normal;
         roomMainLight.enabled = true;
        
         phoneRingingSource.Play();
+        yield return new WaitForSeconds(3f);
+        StartCoroutine(PlayScene1Script());
 
 
         // if (phoneInteractable != null)
@@ -82,6 +85,8 @@ public class Scene1manage : MonoBehaviour
 
     IEnumerator PlayScene1Script()
     {
+        Debug.Log("first stage");
+
         //第一階段
         currentPhase = GamePhase.Phase1_Oppressive;
         ceilingSinkSpeed = 0.05f;
@@ -95,9 +100,10 @@ public class Scene1manage : MonoBehaviour
         {
             yield return StartCoroutine(PlayLineAndSpawnText(line));
         }
-
+        yield return new WaitForSeconds(3f);
 
         //第二階段
+        Debug.Log("second stage");
         currentPhase = GamePhase.Phase2_Panic;
         ceilingSinkSpeed = 0.25f;
         textShootForce = 10f;
@@ -112,6 +118,7 @@ public class Scene1manage : MonoBehaviour
 
 
         //第三階段
+        Debug.Log("third stage");
         TriggerEscapeHole();
     }
 
@@ -228,3 +235,4 @@ public class Scene1manage : MonoBehaviour
     }
 }
 
+// voice clip
