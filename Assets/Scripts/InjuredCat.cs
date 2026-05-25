@@ -47,5 +47,6 @@ public class InjuredCat : MonoBehaviour
 
         Debug.Log("[InjuredCat] Cat healed — notifying CatManager.");
         CatManager.Instance?.OnCatSaved();
+        GameManager.Instance?.CompleteEvent(2);
     }
 }
