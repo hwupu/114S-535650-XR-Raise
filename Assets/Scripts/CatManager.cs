@@ -9,8 +9,9 @@ public class CatManager : MonoBehaviour
     [SerializeField] private GameObject pawPrintPrefab;
 
     [Header("Follow Settings")]
-    [SerializeField] private float followSpeed = 2f;
+    [SerializeField] private float followSpeed    = 2f;
     [SerializeField] private Vector3 followOffset = new Vector3(0.3f, 0f, 0.8f);
+    [SerializeField] private float followDeadzone = 0.4f;
 
     [Header("Paw Print")]
     [SerializeField] private float pawPrintSpacing = 0.4f;
@@ -24,8 +25,10 @@ public class CatManager : MonoBehaviour
     private Transform _rigTransform;
     private Animator _catAnimator;
     private Vector3 _lastPawPrintPos;
-    private bool _followEnabled;
-    private float _lastTerrainY = 0f;
+    private bool    _followEnabled;
+    private float   _lastTerrainY = 0f;
+    private Vector3 _lastBodyPos;
+    private Vector3 _bodyMoveDir;
 
     private void Awake() => Instance = this;
 
@@ -36,6 +39,8 @@ public class CatManager : MonoBehaviour
         {
             _playerHead   = rig.centerEyeAnchor;
             _rigTransform = rig.transform;
+            _lastBodyPos  = _rigTransform.position;
+            _bodyMoveDir  = _rigTransform.forward;
         }
 
         if (catTransform != null)
@@ -84,20 +89,31 @@ public class CatManager : MonoBehaviour
 
     private void FollowPlayer()
     {
-        Vector3 flatForward = _playerHead.forward;
-        flatForward.y = 0;
+        // Only update target when body (rig root) has moved beyond the deadzone.
+        // This prevents the cat from reacting to head rotation.
+        Vector3 currentBodyPos = _rigTransform.position;
+        Vector3 currentFlat    = new Vector3(currentBodyPos.x, 0f, currentBodyPos.z);
+        Vector3 lastFlat       = new Vector3(_lastBodyPos.x,   0f, _lastBodyPos.z);
+
+        float moved = Vector3.Distance(currentFlat, lastFlat);
+        if (moved > followDeadzone)
+        {
+            Vector3 dir = (currentFlat - lastFlat).normalized;
+            _bodyMoveDir = Vector3.Lerp(_bodyMoveDir, dir, Time.deltaTime * 6f);
+            _lastBodyPos = currentBodyPos;
+        }
+
+        Vector3 flatForward = _bodyMoveDir;
+        flatForward.y = 0f;
         if (flatForward.sqrMagnitude < 0.001f) flatForward = Vector3.forward;
         flatForward.Normalize();
 
-        Vector3 flatRight = _playerHead.right;
-        flatRight.y = 0;
-        flatRight.Normalize();
+        Vector3 flatRight = Vector3.Cross(Vector3.up, flatForward).normalized;
 
-        Vector3 targetPos = _playerHead.position
-            + flatRight * followOffset.x
+        Vector3 targetPos = _lastBodyPos
+            + flatRight   * followOffset.x
             + flatForward * followOffset.z;
 
-        // Raycast down to keep cat on ground surface
         if (Physics.Raycast(targetPos + Vector3.up * 2f, Vector3.down, out RaycastHit hit, 10f,
             Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore)
             && hit.collider is TerrainCollider)
@@ -107,10 +123,10 @@ public class CatManager : MonoBehaviour
         catTransform.position = Vector3.MoveTowards(
             catTransform.position, targetPos, followSpeed * Time.deltaTime);
 
-        Vector3 dir = targetPos - catTransform.position;
-        if (dir.sqrMagnitude > 0.001f)
+        Vector3 moveDir = targetPos - catTransform.position;
+        if (moveDir.sqrMagnitude > 0.001f)
         {
-            Quaternion targetRot = Quaternion.LookRotation(dir);
+            Quaternion targetRot = Quaternion.LookRotation(moveDir);
             catTransform.rotation = Quaternion.RotateTowards(
                 catTransform.rotation, targetRot, 180f * Time.deltaTime);
         }
