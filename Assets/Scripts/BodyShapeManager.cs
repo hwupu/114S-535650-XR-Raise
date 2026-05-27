@@ -39,7 +39,8 @@ public class BodyShapeManager : MonoBehaviour
 
     private void ApplyWeightToLocomotion()
     {
-        float t = maxWeight > 0 ? (float)Weight / maxWeight : 0f;
+        float range = maxWeight - startWeight;
+        float t = range > 0 ? Mathf.Clamp01((float)(Weight - startWeight) / range) : 0f;
         swingLocomotion?.SetWeightFactor(t);
     }
 }

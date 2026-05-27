@@ -28,12 +28,25 @@ public class InjuredCat : MonoBehaviour
     }
 
     // Cat has a Sphere Collider (Is Trigger=true). Potion has a Rigidbody.
+    // Scenario A: player tilts potion BEFORE bringing it to cat → fires on entry.
     private void OnTriggerEnter(Collider other)
     {
         if (_healed) return;
-        if (!other.TryGetComponent<PotionPour>(out _)) return;
+        if (!other.TryGetComponent<PotionPour>(out var potion)) return;
+        if (!potion.IsPoured) return;   // must be tilted past tiltThreshold (-0.5f)
 
-        Debug.Log("[InjuredCat] Potion detected — healing cat!");
+        Debug.Log("[InjuredCat] Potion poured on entry — healing cat!");
+        Heal();
+    }
+
+    // Scenario B: player brings potion to cat first, THEN tilts while inside trigger.
+    private void OnTriggerStay(Collider other)
+    {
+        if (_healed) return;
+        if (!other.TryGetComponent<PotionPour>(out var potion)) return;
+        if (!potion.IsPoured) return;   // must be tilted past tiltThreshold (-0.5f)
+
+        Debug.Log("[InjuredCat] Potion poured while in range — healing cat!");
         Heal();
     }
 

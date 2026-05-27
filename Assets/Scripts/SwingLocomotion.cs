@@ -11,8 +11,8 @@ public class SwingLocomotion : MonoBehaviour
     [SerializeField] private float maxSwingVelocity = 5f;
 
     [Header("Speed (Max Weight / Slowest)")]
-    [SerializeField] private float heavyMaxSpeed = 0.6f;
-    [SerializeField] private float heavyDeadzone = 0.5f;
+    [SerializeField] private float heavyMaxSpeed = 0.4f;
+    [SerializeField] private float heavyDeadzone = 1.5f;
 
     [Header("Anti-phase")]
     [SerializeField, Range(0f, 1f)] private float antiphaseWeight = 0.6f;

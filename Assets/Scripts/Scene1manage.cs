@@ -58,7 +58,7 @@ public class Scene1manage : MonoBehaviour
         phoneRingingSource.Play();
         yield return new WaitForSeconds(3f);
         StartCoroutine(PlayScene1Script());
-
+    
 
         // if (phoneInteractable != null)
         // {
