@@ -2,30 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 public class Scene1manage : MonoBehaviour
 {
     public enum GamePhase { Phase0_Normal, Phase1_Oppressive, Phase2_Panic, Phase3_Escape }
     [Header("--- 遊戲目前階段 ---")]
     public GamePhase currentPhase = GamePhase.Phase0_Normal;
 
-
     [Header("--- Phase 0: 電話互動 ---")]
     public GameObject phoneObject;
     public AudioSource phoneRingingSource;
     public AudioSource momAudioSource;  
-
 
     [Header("--- 環境物件連結 ---")]
     public Transform ceilingTransform;
     public Light roomMainLight;
     public Transform playerCameraTransform;
 
-
     [Header("--- 文字發射系統 ---")]
     public GameObject textPrefab;  
     public float spawnRadius = 3f;
-
 
     [System.Serializable]
     public struct VoiceSubtitlePair
@@ -34,57 +29,75 @@ public class Scene1manage : MonoBehaviour
         [TextArea] public string subtitleText;
     }
 
-
     [Header("--- 第一階段語音與字串 (關心、碎念) ---")]
     public List<VoiceSubtitlePair> phase1Lines;
-
 
     [Header("--- 第二階段語音與字串 (控制、飆速) ---")]
     public List<VoiceSubtitlePair> phase2Lines;
 
+    [Header("--- 轉場事件 (逃跑) ---")]
+    public AudioSource catAudioSource;           
+    public AudioClip catEscapeClip;              
+    public AudioClip momFinalYellClip;           
+    [TextArea]
+    public string momFinalYellText = "整天只知道出去玩！你最好給我10分鐘內回家！";
 
+    [Header("--- 場景轉移設定 ---")]
+    public Transform playerRig;                  
+    public Transform forestSpawnPoint;           
+
+    // === 動態參數與狀態記錄 ===
     private float ceilingSinkSpeed = 0f;
     private float lightFlickerSpeed = 0.5f;
     private float textShootForce = 5f;
-    private bool isFlickering = false;
+    private bool isEscaping = false;
 
+    // [新增] 故事是否已經完整播放過的鎖
+    private bool hasPlayedMainStory = false; 
+
+    // 用來記錄房間的初始狀態，方便玩家回家時還原
+    private Vector3 initialCeilingPosition;
+    private float initialLightIntensity;
+    
+    // 記錄發射出去的文字，以便重置時一次清空
+    private List<GameObject> activeTexts = new List<GameObject>();
 
     IEnumerator Start()
     {
         Debug.Log("starting");
         currentPhase = GamePhase.Phase0_Normal;
-        roomMainLight.enabled = true;
-       
-        phoneRingingSource.Play();
-        yield return new WaitForSeconds(3f);
-        StartCoroutine(PlayScene1Script());
-    
+        
+        // 記錄客廳一開始的原始狀態
+        if (ceilingTransform != null) initialCeilingPosition = ceilingTransform.position;
+        if (roomMainLight != null) 
+        {
+            roomMainLight.enabled = true;
+            initialLightIntensity = roomMainLight.intensity;
+        }
 
-        // if (phoneInteractable != null)
-        // {
-        //     phoneInteractable.selectEntered.AddListener(OnPhonePickedUp);
-        //     phoneRingingSource.Play();
-        // }
+        
+        if (!hasPlayedMainStory)
+        {
+            phoneRingingSource.Play();
+            yield return new WaitForSeconds(3f);
+            StartCoroutine(PlayScene1Script());
+        }
     }
+
     public void StartMotherCalling()
     {
+        // [新增] 防呆鎖：如果已經播過故事，直接中斷，不再執行
+        if (hasPlayedMainStory) return; 
+
         if (phoneRingingSource != null) phoneRingingSource.Stop();
-       
         StartCoroutine(PlayScene1Script());
     }
-
-
-    // private void OnPhonePickedUp(SelectEnterEventArgs args)
-    // {
-    //     phoneRingingSource.Stop();
-    //     phoneInteractable.enabled = false;
-       
-    //     StartCoroutine(PlayScene1Script());
-    // }
-
 
     IEnumerator PlayScene1Script()
     {
+        // [新增] 一進入劇本就立刻上鎖，確保不會被重複觸發
+        hasPlayedMainStory = true; 
+
         Debug.Log("first stage");
 
         //第一階段
@@ -94,10 +107,9 @@ public class Scene1manage : MonoBehaviour
         lightFlickerSpeed = 0.8f;
         StartCoroutine(LightFlickerLoop());
 
-
-        // 依序播放
         foreach (var line in phase1Lines)
         {
+            if (isEscaping) yield break; 
             yield return StartCoroutine(PlayLineAndSpawnText(line));
         }
         yield return new WaitForSeconds(3f);
@@ -109,80 +121,64 @@ public class Scene1manage : MonoBehaviour
         textShootForce = 10f;
         lightFlickerSpeed = 0.15f;
 
-
         foreach (var line in phase2Lines)
         {
+            if (isEscaping) yield break;
             if (ceilingTransform.position.y <= 1.3f) break;
             yield return StartCoroutine(PlayLineAndSpawnText(line));
         }
 
-
-        //第三階段
-        Debug.Log("third stage");
-        TriggerEscapeHole();
+        // 第三階段 (觸發轉場事件)
+        if (!isEscaping)
+        {
+            TriggerFinalEscapeSequence();
+        }
     }
 
-
- 
     IEnumerator PlayLineAndSpawnText(VoiceSubtitlePair line)
     {
         if (line.voiceClip == null) yield break;
 
-
         momAudioSource.clip = line.voiceClip;
         momAudioSource.Play();
-
-
-
 
         float clipDuration = line.voiceClip.length;
         float elapsed = 0f;
         float spawnInterval = (currentPhase == GamePhase.Phase2_Panic) ? 0.3f : 0.8f;
 
-
         while (elapsed < clipDuration)
         {
+            if (isEscaping) yield break; 
             SpawnTextInPlayerView(line.subtitleText);
             yield return new WaitForSeconds(spawnInterval);
             elapsed += spawnInterval;
         }
 
-
-        // 播完才換下一句
         if (momAudioSource.isPlaying)
         {
             yield return new WaitWhile(() => momAudioSource.isPlaying);
         }
     }
 
-
-
-
     private void SpawnTextInPlayerView(string textContent)
     {
         float randomAngle = Random.Range(-60f, 60f);
         float randomHeight = Random.Range(-0.5f, 1.5f);
-
 
         Vector3 playerPos = playerCameraTransform.position;
         Vector3 forwardDirection = playerCameraTransform.forward;
         forwardDirection.y = 0;
         forwardDirection.Normalize();
 
-
         Vector3 spawnDirection = Quaternion.Euler(0, randomAngle, 0) * forwardDirection;
         Vector3 spawnPosition = playerPos + (spawnDirection * spawnRadius);
         spawnPosition.y += randomHeight;
 
-
         GameObject spawnedText = Instantiate(textPrefab, spawnPosition, Quaternion.identity);
-       
         spawnedText.transform.LookAt(playerPos);
-
 
         TMPro.TextMeshPro tmp = spawnedText.GetComponentInChildren<TMPro.TextMeshPro>();
         if (tmp != null) tmp.text = textContent;
-
 
         Rigidbody rb = spawnedText.GetComponent<Rigidbody>();
         if (rb != null)
@@ -190,8 +186,9 @@ public class Scene1manage : MonoBehaviour
             Vector3 shootDirection = (playerPos - spawnPosition).normalized;
             rb.AddForce(shootDirection * textShootForce, ForceMode.Impulse);
         }
-    }
 
+        activeTexts.Add(spawnedText);
+    }
 
     void Update()
     {
@@ -199,40 +196,106 @@ public class Scene1manage : MonoBehaviour
         {
             ceilingTransform.Translate(Vector3.down * ceilingSinkSpeed * Time.deltaTime, Space.World);
 
-
-            if (ceilingTransform.position.y <= 1.2f && currentPhase != GamePhase.Phase3_Escape)
+            if (ceilingTransform.position.y <= 1.2f && !isEscaping)
             {
-                TriggerEscapeHole();
+                TriggerFinalEscapeSequence();
             }
         }
     }
 
-
     IEnumerator LightFlickerLoop()
     {
-        isFlickering = true;
         while (currentPhase == GamePhase.Phase1_Oppressive || currentPhase == GamePhase.Phase2_Panic)
         {
-            roomMainLight.enabled = !roomMainLight.enabled;
+            if (roomMainLight != null) roomMainLight.enabled = !roomMainLight.enabled;
             yield return new WaitForSeconds(lightFlickerSpeed);
         }
-        roomMainLight.enabled = false; // 進入下一關時全黑
     }
 
-
-    // 地板破洞逃脫
-    void TriggerEscapeHole()
+    void TriggerFinalEscapeSequence()
     {
-        if (currentPhase == GamePhase.Phase3_Escape) return;
+        if (isEscaping) return;
+        isEscaping = true;
         currentPhase = GamePhase.Phase3_Escape;
-       
-        StopAllCoroutines();
-        momAudioSource.Stop();
-        roomMainLight.enabled = false;
-       
-        Debug.Log("【第一場景結束】天花板壓迫至極限，觸發轉場動畫進入第二場景森林。");
-        // 這裡轉到第二場景
+
+        Debug.Log("第三階段：貓咪介入，準備逃跑！");
+        
+        StopAllCoroutines(); 
+        if (momAudioSource != null) momAudioSource.Stop();
+        
+        StartCoroutine(EscapeSequenceCoroutine());
+    }
+
+    IEnumerator EscapeSequenceCoroutine()
+    {
+        if (roomMainLight != null)
+        {
+            roomMainLight.enabled = true;
+            roomMainLight.intensity = initialLightIntensity * 0.5f; 
+        }
+
+        if (catAudioSource != null && catEscapeClip != null)
+        {
+            catAudioSource.clip = catEscapeClip;
+            catAudioSource.Play();
+            yield return new WaitForSeconds(catEscapeClip.length);
+        }
+
+        if (momAudioSource != null && momFinalYellClip != null)
+        {
+            momAudioSource.clip = momFinalYellClip;
+            momAudioSource.Play();
+
+            float elapsed = 0f;
+            while (elapsed < momFinalYellClip.length)
+            {
+                SpawnTextInPlayerView(momFinalYellText);
+                yield return new WaitForSeconds(0.2f); 
+                elapsed += 0.2f;
+            }
+            yield return new WaitWhile(() => momAudioSource.isPlaying);
+        }
+
+        if (roomMainLight != null) roomMainLight.enabled = false;
+        yield return new WaitForSeconds(0.5f);
+
+        TeleportToForest();
+    }
+
+    void TeleportToForest()
+    {
+        Debug.Log("傳送至森林！");
+
+        if (playerRig != null && forestSpawnPoint != null)
+        {
+            playerRig.position = forestSpawnPoint.position;
+        }
+
+        ResetLivingRoom();
+    }
+
+    void ResetLivingRoom()
+    {
+        if (ceilingTransform != null)
+        {
+            ceilingTransform.position = initialCeilingPosition;
+        }
+
+        if (roomMainLight != null)
+        {
+            roomMainLight.enabled = true;
+            roomMainLight.intensity = initialLightIntensity;
+        }
+
+        foreach (GameObject txt in activeTexts)
+        {
+            if (txt != null) Destroy(txt);
+        }
+        activeTexts.Clear(); 
+
+        currentPhase = GamePhase.Phase0_Normal;
+        isEscaping = false;
+
+        Debug.Log("客廳已重置完畢，隨時準備迎接玩家回家。");
     }
 }
-
-// voice clip
