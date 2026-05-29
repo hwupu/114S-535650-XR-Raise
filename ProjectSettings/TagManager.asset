@@ -30,6 +30,7 @@ TagManager:
   - SamplesInfoPanel
   - QDSUIToggleCheckboxRadio
   - Coin
+  - Hand
   layers:
   - Default
   - TransparentFX

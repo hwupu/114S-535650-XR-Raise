@@ -44,7 +44,11 @@ public class Scene1manage : MonoBehaviour
 
     [Header("--- 場景轉移設定 ---")]
     public Transform playerRig;                  
-    public Transform forestSpawnPoint;           
+    public Transform forestSpawnPoint;     
+
+    [Header("--- 打開門 ---")]
+    public GameObject firstDoor;        
+    public GameObject secondDoor;      
 
     // === 動態參數與狀態記錄 ===
     private float ceilingSinkSpeed = 0f;
@@ -74,6 +78,8 @@ public class Scene1manage : MonoBehaviour
             roomMainLight.enabled = true;
             initialLightIntensity = roomMainLight.intensity;
         }
+        if (firstDoor != null) firstDoor.SetActive(true);
+        if (secondDoor != null) secondDoor.SetActive(false);
 
         
         if (!hasPlayedMainStory)
@@ -264,13 +270,33 @@ public class Scene1manage : MonoBehaviour
 
     void TeleportToForest()
     {
-        Debug.Log("傳送至森林！");
+        Debug.Log("準備傳送至森林！");
 
         if (playerRig != null && forestSpawnPoint != null)
         {
+            // 1. 抓取玩家身上的角色控制器 (如果有的話)
+            CharacterController cc = playerRig.GetComponent<CharacterController>();
+            
+            // 2. 傳送前：先關閉物理控制器，避免座標被強制拉回
+            if (cc != null) 
+            {
+                cc.enabled = false;
+            }
+
+            // 3. 執行傳送 (同時傳送位置與面向角度)
             playerRig.position = forestSpawnPoint.position;
+            playerRig.rotation = forestSpawnPoint.rotation; // 建議把 Rotation 也一起同步，這樣玩家一傳過去才會面向正前方
+
+            // 4. 傳送後：立刻重新開啟控制器
+            if (cc != null) 
+            {
+                cc.enabled = true;
+            }
+
+            Debug.Log("成功傳到森林座標: " + forestSpawnPoint.position);
         }
 
+        // 傳送完畢後重置客廳
         ResetLivingRoom();
     }
 
@@ -292,6 +318,9 @@ public class Scene1manage : MonoBehaviour
             if (txt != null) Destroy(txt);
         }
         activeTexts.Clear(); 
+
+        if (firstDoor != null) firstDoor.SetActive(true);
+        if (secondDoor != null) secondDoor.SetActive(false);
 
         currentPhase = GamePhase.Phase0_Normal;
         isEscaping = false;
