@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
+// ForestManage.Instance.OnMakeParentChoice();
+// ForestManage.Instance.OnMakeSelfChoice();
 public class ForestManage : MonoBehaviour
 {
     [Header("--- 石頭陣控制 (圍牆) ---")]
@@ -18,8 +19,9 @@ public class ForestManage : MonoBehaviour
     public AudioClip stoneMoveClip;            
     public AudioSource playerAudioSource;      // 掛在玩家
     public AudioClip damageClip;               // 被撞擊
+    public AudioSource bgmAudioSource;         // 背景音樂
+    public AudioClip bgmClip;  
    
-    // OVR 震動直接透過 OVRInput API 觸發，不需要手動綁定 Controller 物件
 
 
     [Header("--- 危險動物生成系統 ---")]
@@ -34,7 +36,19 @@ public class ForestManage : MonoBehaviour
     public Transform spawnPoint;            
     public int playerHealth = 3;          
 
+    public static ForestManage Instance;
 
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
     void Start()
     {
         if (stoneRingTransform != null)
@@ -42,6 +56,12 @@ public class ForestManage : MonoBehaviour
             targetY = stoneRingTransform.position.y;
         }
         playerHealth = 3;
+        if (bgmAudioSource != null && bgmClip != null)
+        {
+            bgmAudioSource.clip = bgmClip;
+            bgmAudioSource.loop = true;
+            bgmAudioSource.Play();
+        }
     }
 
 

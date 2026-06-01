@@ -46,13 +46,17 @@ public class Scene1manage : MonoBehaviour
     public Transform playerRig;                  
     public Transform forestSpawnPoint;           
 
+    [Header("--- 雙門顯示控制 ---")]
+    public GameObject firstDoor;                  // 初始顯示的第一個門
+    public GameObject secondDoor;                 // 重置客廳後（十萬火急回家後）才顯示的第二個門
+
     // === 動態參數與狀態記錄 ===
     private float ceilingSinkSpeed = 0f;
     private float lightFlickerSpeed = 0.5f;
     private float textShootForce = 5f;
     private bool isEscaping = false;
 
-    // [新增] 故事是否已經完整播放過的鎖
+    // 故事是否已經完整播放過的鎖
     private bool hasPlayedMainStory = false; 
 
     // 用來記錄房間的初始狀態，方便玩家回家時還原
@@ -75,7 +79,10 @@ public class Scene1manage : MonoBehaviour
             initialLightIntensity = roomMainLight.intensity;
         }
 
-        
+        // === 初始狀態：顯示第一個門，隱藏第一個門 ===
+        if (firstDoor != null) firstDoor.SetActive(true);
+        if (secondDoor != null) secondDoor.SetActive(false);
+
         if (!hasPlayedMainStory)
         {
             phoneRingingSource.Play();
@@ -86,7 +93,6 @@ public class Scene1manage : MonoBehaviour
 
     public void StartMotherCalling()
     {
-        // [新增] 防呆鎖：如果已經播過故事，直接中斷，不再執行
         if (hasPlayedMainStory) return; 
 
         if (phoneRingingSource != null) phoneRingingSource.Stop();
@@ -95,7 +101,6 @@ public class Scene1manage : MonoBehaviour
 
     IEnumerator PlayScene1Script()
     {
-        // [新增] 一進入劇本就立刻上鎖，確保不會被重複觸發
         hasPlayedMainStory = true; 
 
         Debug.Log("first stage");
@@ -128,7 +133,6 @@ public class Scene1manage : MonoBehaviour
             yield return StartCoroutine(PlayLineAndSpawnText(line));
         }
 
-        // 第三階段 (觸發轉場事件)
         if (!isEscaping)
         {
             TriggerFinalEscapeSequence();
@@ -264,11 +268,26 @@ public class Scene1manage : MonoBehaviour
 
     void TeleportToForest()
     {
-        Debug.Log("傳送至森林！");
+        Debug.Log("準備傳送至森林！");
 
         if (playerRig != null && forestSpawnPoint != null)
         {
+            CharacterController cc = playerRig.GetComponent<CharacterController>();
+            
+            if (cc != null) 
+            {
+                cc.enabled = false;
+            }
+
             playerRig.position = forestSpawnPoint.position;
+            playerRig.rotation = forestSpawnPoint.rotation; 
+
+            if (cc != null) 
+            {
+                cc.enabled = true;
+            }
+
+            Debug.Log("成功傳到森林座標: " + forestSpawnPoint.position);
         }
 
         ResetLivingRoom();
@@ -292,6 +311,16 @@ public class Scene1manage : MonoBehaviour
             if (txt != null) Destroy(txt);
         }
         activeTexts.Clear(); 
+
+        // === 核心修改：重置客廳後顯示第二個門 ===
+        if (secondDoor != null) 
+        {
+            secondDoor.SetActive(true);
+            Debug.Log("解鎖新路線：第二個門已顯示。");
+        }
+
+        // 如果你希望在顯示新門的同時，把原本的第一個門關掉，可以把下面這行的註解拿掉：
+        // if (firstDoor != null) firstDoor.SetActive(false);
 
         currentPhase = GamePhase.Phase0_Normal;
         isEscaping = false;
