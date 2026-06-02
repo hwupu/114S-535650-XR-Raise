@@ -26,6 +26,8 @@ public class AdmissionLetterChoice : MonoBehaviour
     // Static flag shared by both letter instances so only one choice fires
     private static bool _eventDone;
 
+    public static void MarkEventDone() => _eventDone = true;
+
     private void Awake()
     {
         _rb     = GetComponent<Rigidbody>();

@@ -74,6 +74,18 @@ public class GameManager : MonoBehaviour
         if (_event3Done) return;
         ChoseSafe = SafeCoins >= PiggyCoins;
         Debug.Log($"[GameManager] Money finalized — ChoseSafe:{ChoseSafe} (Safe:{SafeCoins} Piggy:{PiggyCoins})");
+
+        if (ChoseSafe)
+        {
+            if (ForestManage.Instance != null) ForestManage.Instance.OnMakeParentChoice();
+            Debug.Log("[GameManager] Vault 獲勝（安全選擇）→ ForestManage.OnMakeParentChoice()");
+        }
+        else
+        {
+            if (ForestManage.Instance != null) ForestManage.Instance.OnMakeSelfChoice();
+            Debug.Log("[GameManager] PiggyBank 獲勝（危險選擇）→ ForestManage.OnMakeSelfChoice()");
+        }
+
         CompleteEvent(3);
     }
 
