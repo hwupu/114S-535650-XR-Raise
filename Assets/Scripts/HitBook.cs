@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class HitBook : MonoBehaviour
 {
-    public int hitCountToDestroy = 5;
+    public int hitCountToDestroy = 1;
    
     private int currentHitCount = 0;
     private float hitCooldown = 0.4f;  
