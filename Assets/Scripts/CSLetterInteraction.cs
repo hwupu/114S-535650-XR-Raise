@@ -1,28 +1,26 @@
 using System.Collections;
 using UnityEngine;
+using Oculus.Interaction;
 
 // Attach to the CS admission letter prefab INSTEAD OF AdmissionLetterChoice.
-// The Music letter keeps AdmissionLetterChoice unchanged.
+// The Music letter uses MusicalLetterInteraction.
 //
-// State flow:
-//   Idle → (grab attempt) → ChallengeActive → (type "world" + Enter) → Solved → (grab) → Chosen
+// State flow:  Idle → (grip grab) → Active → (type "world" + Enter) → Chosen
 //
-// Grab detection mirrors the project pattern: OVRGrabbable sets Rigidbody.isKinematic = true.
+// Grab detection uses transform.parent edge-detection:
+//   grabStarted = parent changed to a grab-system hand (not _initialParent)
+// No escape mechanic — the letter follows the controller normally.
+// Letter pulses red while Active; turns green when solved then grows 2× and disappears.
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(VRKeyboard))]
 public class CSLetterInteraction : MonoBehaviour
 {
-    private enum State { Idle, ChallengeActive, Solved, Chosen }
+    private enum State { Idle, Active, Chosen }
 
     [Header("References")]
-    [SerializeField] private AdmissionLetterChoice musicLetter;
-
-    [Header("Escape Settings")]
-    [SerializeField] private float escapeRadiusMin = 1.0f;
-    [SerializeField] private float escapeRadiusMax = 2.5f;
+    [SerializeField] private MusicalLetterInteraction musicLetter;
 
     [Header("Audio")]
-    [SerializeField] private AudioClip escapeSound;
     [SerializeField] private AudioClip solveSound;
 
     [Header("Debug")]
@@ -30,29 +28,40 @@ public class CSLetterInteraction : MonoBehaviour
 
     private State          _state = State.Idle;
     private Rigidbody      _rb;
+    private Grabbable      _grabbable;
     private SpriteRenderer _sprite;
     private Color          _originalColor;
     private VRKeyboard     _keyboard;
     private OVRCameraRig   _rig;
     private string         _typedText = "";
+    private bool           _wasGrabbed = false;
+    private float          _dbgTimer   = 0f;
+    private Coroutine      _pulseCoroutine = null;
 
     // ── Unity ───────────────────────────────────────────────────────────────
 
     private void Awake()
     {
-        _rb      = GetComponent<Rigidbody>();
-        _sprite  = GetComponentInChildren<SpriteRenderer>();
-        _keyboard = GetComponent<VRKeyboard>();
+        _rb        = GetComponent<Rigidbody>();
+        _grabbable = GetComponent<Grabbable>();
+        _sprite    = GetComponentInChildren<SpriteRenderer>();
+        _keyboard  = GetComponent<VRKeyboard>();
 
         if (_sprite != null) _originalColor = _sprite.color;
+        Debug.Log($"[CSLetter] Awake: _grabbable={(_grabbable==null?"NULL":"OK")}, _keyboard={(_keyboard==null?"NULL":"OK")}, _rb={(_rb==null?"NULL":"OK")}");
     }
 
     private void Start()
     {
         _rig = FindObjectOfType<OVRCameraRig>();
+        Debug.Log($"[CSLetter] Start: _rig={(_rig==null?"NULL":"OK")}");
 
-        _keyboard.OnKeyTyped       += OnKeyTyped;
-        _keyboard.OnEnterPressed   += OnEnterPressed;
+
+        _rb.isKinematic = true;
+        _rb.useGravity  = false;
+
+        _keyboard.OnKeyTyped         += OnKeyTyped;
+        _keyboard.OnEnterPressed     += OnEnterPressed;
         _keyboard.OnBackspacePressed += OnBackspacePressed;
 
         _keyboard.Hide();
@@ -72,46 +81,64 @@ public class CSLetterInteraction : MonoBehaviour
 
         DebugInput();
 
+        bool isGrabbed   = _grabbable != null && _grabbable.SelectingPointsCount > 0;
+        bool grabStarted = isGrabbed  && !_wasGrabbed;
+        bool grabEnded   = !isGrabbed && _wasGrabbed;
+        _wasGrabbed = isGrabbed;
+
+        _dbgTimer += Time.deltaTime;
+        if (_dbgTimer >= 2f)
+        {
+            _dbgTimer = 0f;
+            string grabStatus = _grabbable == null ? "NULL" : (_grabbable.SelectingPointsCount > 0 ? "GRABBED" : "not-grabbed");
+            Debug.Log($"[CSLetter] poll: state={_state}, grab={grabStatus}, parent={transform.parent?.name ?? "none"}");
+        }
+
         switch (_state)
         {
             case State.Idle:
-                if (_rb.isKinematic)
+                if (grabStarted)
                 {
-                    ForceRelease();
-                    StartCoroutine(FlashCoroutine(Color.white, 0.15f));
-                    EscapeToRandomPosition();
-                    PlaySound(escapeSound);
+                    if (musicLetter != null) musicLetter.LoseFocus();
                     ShowKeyboard();
-                    _state = State.ChallengeActive;
-                    Debug.Log($"[CSLetter] Idle → ChallengeActive. 通知書逃到 {transform.position}");
+                    StartPulse();
+                    _state = State.Active;
+                    Debug.Log("[CSLetter] Idle → Active. VRKeyboard 出現。");
                 }
                 break;
 
-            case State.ChallengeActive:
-                // block every grab attempt until puzzle is solved
-                if (_rb.isKinematic)
+            case State.Active:
+                if (grabEnded)
                 {
-                    ForceRelease();
-                    StartCoroutine(FlashCoroutine(Color.red, 0.2f));
-                    EscapeToRandomPosition();
-                    PlaySound(escapeSound);
-                    _keyboard.SetStatusText("Grab blocked! Type 'world' first.", Color.red);
-                    Debug.Log($"[CSLetter] 抓取被阻擋！通知書逃到 {transform.position}");
+                    _rb.isKinematic     = true;
+                    _rb.velocity        = Vector3.zero;
+                    _rb.angularVelocity = Vector3.zero;
                 }
-                break;
-
-            case State.Solved:
-                if (_rb.isKinematic)
-                    Choose();
+                if (grabStarted)
+                {
+                    if (musicLetter != null) musicLetter.LoseFocus();
+                    ShowKeyboard();
+                    StartPulse();
+                    Debug.Log("[CSLetter] 重新抓取，鍵盤重新定位。");
+                }
                 break;
         }
+    }
+
+    // ── public: called by Music letter when it takes focus ──────────────────
+
+    public void LoseFocus()
+    {
+        if (_state != State.Active) return;
+        _keyboard.Hide();
+        StopPulse();
     }
 
     // ── keyboard callbacks ──────────────────────────────────────────────────
 
     private void OnKeyTyped(char c)
     {
-        if (_state != State.ChallengeActive) return;
+        if (_state != State.Active) return;
         _typedText += char.ToLower(c);
         _keyboard.SetTypedText(_typedText, Color.white);
         _keyboard.SetStatusText("Press ENTER to confirm.", new Color(0.8f, 0.8f, 0.8f));
@@ -120,113 +147,118 @@ public class CSLetterInteraction : MonoBehaviour
 
     private void OnEnterPressed()
     {
-        if (_state != State.ChallengeActive) return;
+        if (_state != State.Active) return;
 
         if (_typedText.ToLower() == "world")
         {
-            _state = State.Solved;
-            _keyboard.SetTypedText(_typedText, Color.green);
-            _keyboard.SetStatusText("Correct! Now grab the letter.", Color.green);
-            StartCoroutine(FlashCoroutine(new Color(0.3f, 1f, 0.3f), 0.4f));
+            _state = State.Chosen;
+            AdmissionLetterChoice.MarkEventDone();
+            _keyboard.Hide();
+            StopPulse();
+            GameManager.Instance?.RecordDepartmentChoice(true);
+            if (ForestManage.Instance != null)
+                ForestManage.Instance.OnMakeParentChoice();
+            else
+                Debug.LogWarning("[CSLetter] ForestManage.Instance = NULL → 安全選擇未觸發！請確認場景中有 ForestManage 物件。");
+            if (musicLetter != null) { musicLetter.LoseFocus(); musicLetter.gameObject.SetActive(false); }
             PlaySound(solveSound);
-            Debug.Log("[CSLetter] ✓ 正確！ChallengeActive → Solved。可以抓取通知書。");
+            Debug.Log("[CSLetter] ★ CS 系選定（安全選擇）→ ForestManage.OnMakeParentChoice()");
+            StartCoroutine(ChosenCelebration());
         }
         else
         {
-            // wrong answer — flash, escape, reset
             _keyboard.SetTypedText(_typedText, Color.red);
             _keyboard.SetStatusText("Wrong! Hint: printf(\"hello \") ______", Color.red);
-            StartCoroutine(FlashCoroutine(Color.red, 0.2f));
-            EscapeToRandomPosition();
-            PlaySound(escapeSound);
-            Debug.Log($"[CSLetter] ✗ 答錯: '{_typedText}'。通知書逃到 {transform.position}。清除輸入。");
+            Debug.Log($"[CSLetter] ✗ 答錯: '{_typedText}'。");
             _typedText = "";
-
-            // delay clearing typed display so player can read the red text
             StartCoroutine(ClearTypedAfterDelay(1.0f));
         }
     }
 
     private void OnBackspacePressed()
     {
-        if (_state != State.ChallengeActive || _typedText.Length == 0) return;
+        if (_state != State.Active || _typedText.Length == 0) return;
         _typedText = _typedText.Substring(0, _typedText.Length - 1);
         _keyboard.SetTypedText(_typedText, Color.white);
         Debug.Log($"[CSLetter] Backspace，目前: '{_typedText}'");
     }
 
-    // ── choose ──────────────────────────────────────────────────────────────
+    // ── helpers ─────────────────────────────────────────────────────────────
 
-    private void Choose()
+    private IEnumerator RedPulse()
     {
-        _state = State.Chosen;
-        AdmissionLetterChoice.MarkEventDone();
-        musicLetter?.StartCoroutine(musicLetter.FloatAway());
-        GameManager.Instance?.RecordDepartmentChoice(true);
-        _keyboard.Hide();
-        if (ForestManage.Instance != null) ForestManage.Instance.OnMakeParentChoice();
-        Debug.Log("[CSLetter] ★ CS 系選定（安全選擇）→ ForestManage.OnMakeParentChoice()");
+        while (true)
+        {
+            SetColor(Color.red);
+            yield return new WaitForSeconds(0.3f);
+            SetColor(_originalColor);
+            yield return new WaitForSeconds(0.3f);
+        }
     }
 
-    // ── public float-away (called by MusicalLetterInteraction when Music is chosen) ──
-
-    public IEnumerator FloatAway()
+    private void StartPulse()
     {
-        _state = State.Chosen;
-        if (_keyboard != null) _keyboard.Hide();
-        float elapsed  = 0f;
-        Vector3 startPos = transform.position;
-        Color   startCol = _sprite != null ? _sprite.color : Color.white;
+        if (_pulseCoroutine != null) StopCoroutine(_pulseCoroutine);
+        _pulseCoroutine = StartCoroutine(RedPulse());
+    }
 
-        while (elapsed < 2f)
+    private void StopPulse()
+    {
+        if (_pulseCoroutine != null) { StopCoroutine(_pulseCoroutine); _pulseCoroutine = null; }
+        SetColor(_originalColor);
+    }
+
+    private IEnumerator ChosenCelebration()
+    {
+        OVRGrabbable ovr = GetComponent<OVRGrabbable>();
+        if (ovr != null && ovr.isGrabbed)
+            ovr.grabbedBy.ForceRelease(ovr);
+        transform.SetParent(null);
+        _rb.isKinematic     = true;
+        _rb.velocity        = Vector3.zero;
+        _rb.angularVelocity = Vector3.zero;
+
+        SetColor(Color.green);
+
+        Vector3 startScale = transform.localScale;
+        float   elapsed    = 0f;
+        float   duration   = 0.8f;
+        while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / 2f;
-            transform.position = startPos + Vector3.up * (t * 1.5f);
-            if (_sprite != null)
-            {
-                Color c = startCol;
-                c.a = Mathf.Lerp(1f, 0f, t);
-                _sprite.color = c;
-            }
+            transform.localScale = Vector3.Lerp(startScale, startScale * 2f, elapsed / duration);
             yield return null;
         }
+
         gameObject.SetActive(false);
     }
 
-    // ── helpers ─────────────────────────────────────────────────────────────
-
-    private void ForceRelease()
+    private void SetColor(Color color)
     {
-        OVRGrabbable grabbable = GetComponent<OVRGrabbable>();
-        if (grabbable != null && grabbable.isGrabbed)
-            grabbable.grabbedBy.ForceRelease(grabbable);
-
-        _rb.isKinematic    = false;
-        _rb.velocity        = Vector3.zero;
-        _rb.angularVelocity = Vector3.zero;
-    }
-
-    private void EscapeToRandomPosition()
-    {
-        float y     = transform.position.y;
-        float angle = UnityEngine.Random.Range(0f, 360f) * Mathf.Deg2Rad;
-        float dist  = UnityEngine.Random.Range(escapeRadiusMin, escapeRadiusMax);
-
-        Vector3 offset = new Vector3(Mathf.Sin(angle) * dist, 0f, Mathf.Cos(angle) * dist);
-        transform.position = new Vector3(
-            transform.position.x + offset.x,
-            y,
-            transform.position.z + offset.z
-        );
+        if (_sprite != null)
+        {
+            _sprite.color = color;
+            return;
+        }
+        Renderer rend = GetComponentInChildren<Renderer>();
+        if (rend != null)
+        {
+            MaterialPropertyBlock mpb = new MaterialPropertyBlock();
+            rend.GetPropertyBlock(mpb);
+            mpb.SetColor("_BaseColor", color);
+            mpb.SetColor("_Color",     color);
+            rend.SetPropertyBlock(mpb);
+        }
     }
 
     private void ShowKeyboard()
     {
-        Transform head = _rig   != null ? _rig.centerEyeAnchor
+        if (_rig == null) _rig = FindObjectOfType<OVRCameraRig>();
+        Transform head = _rig      != null ? _rig.centerEyeAnchor
                        : Camera.main != null ? Camera.main.transform
                        : null;
-        if (head == null) return;
+        Debug.Log($"[CSLetter] ShowKeyboard: _rig={(_rig==null?"NULL":"OK")}, head={( head==null?"NULL":head.name)}, _keyboard={(_keyboard==null?"NULL":"OK")}");
+        if (head == null) { Debug.LogWarning("[CSLetter] ShowKeyboard ABORTED: head is null"); return; }
 
         Vector3 pos    = head.position + head.forward * 1.5f;
         pos.y          = head.position.y - 0.1f;
@@ -234,24 +266,16 @@ public class CSLetterInteraction : MonoBehaviour
 
         _typedText = "";
         _keyboard.SetTypedText("", Color.white);
-        _keyboard.SetStatusText("Spell 'world' to unlock the letter.", new Color(0.8f, 0.8f, 0.8f));
+        _keyboard.SetStatusText("Spell 'world' to choose CS.", new Color(0.8f, 0.8f, 0.8f));
         _keyboard.Show(pos, rot);
-        Debug.Log($"[CSLetter] 鍵盤出現在 pos={pos}  euler={rot.eulerAngles}");
-    }
-
-    private IEnumerator FlashCoroutine(Color flashColor, float duration)
-    {
-        if (_sprite == null) yield break;
-        _sprite.color = flashColor;
-        yield return new WaitForSeconds(duration);
-        if (_sprite != null) _sprite.color = _originalColor;
+        Debug.Log($"[CSLetter] VRKeyboard.Show() called at pos={pos}");
     }
 
     private IEnumerator ClearTypedAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
         _typedText = "";
-        if (_state == State.ChallengeActive)
+        if (_state == State.Active)
             _keyboard.SetTypedText("", Color.white);
     }
 
@@ -266,38 +290,31 @@ public class CSLetterInteraction : MonoBehaviour
     {
         if (!enableDebugTrigger) return;
 
-        // C = force-solve (skip typing, go to Solved)
-        if (Input.GetKeyDown(KeyCode.C) && _state == State.ChallengeActive)
+        // G = simulate grab (Idle → Active)
+        if (Input.GetKeyDown(KeyCode.G) && _state == State.Idle)
         {
-            _typedText = "world";
-            _keyboard.SetTypedText(_typedText, Color.green);
-            _keyboard.SetStatusText("(Debug) Correct! Now grab the letter.", Color.green);
-            _state = State.Solved;
+            if (musicLetter != null) musicLetter.LoseFocus();
+            ShowKeyboard();
+            StartPulse();
+            _state = State.Active;
+            Debug.Log("[CSLetter] [G鍵] Idle → Active");
         }
 
-        // K = show keyboard (for testing without grabbing)
+        // K = show keyboard only (Idle → Active, no grab sim)
         if (Input.GetKeyDown(KeyCode.K) && _state == State.Idle)
         {
             ShowKeyboard();
-            _state = State.ChallengeActive;
+            StartPulse();
+            _state = State.Active;
+            Debug.Log("[CSLetter] [K鍵] Idle → Active（僅鍵盤）");
         }
 
-        // G = simulate grab (Idle → ChallengeActive, or Solved → Chosen)
-        if (Input.GetKeyDown(KeyCode.G))
+        // C = force-solve
+        if (Input.GetKeyDown(KeyCode.C) && _state == State.Active)
         {
-            if (_state == State.Idle)
-            {
-                StartCoroutine(FlashCoroutine(Color.white, 0.15f));
-                EscapeToRandomPosition();
-                ShowKeyboard();
-                _state = State.ChallengeActive;
-                Debug.Log($"[CSLetter] [G鍵] 模擬抓取 → ChallengeActive。通知書逃到 {transform.position}");
-            }
-            else if (_state == State.Solved)
-            {
-                Debug.Log("[CSLetter] [G鍵] 模擬最終抓取 → Choose()");
-                Choose();
-            }
+            _typedText = "world";
+            OnEnterPressed();
+            Debug.Log("[CSLetter] [C鍵] 強制解謎");
         }
     }
 }

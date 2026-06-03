@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
     public event Action<int> OnEventCompleted;
 
     private bool _event1Done, _event2Done, _event3Done;
+    private bool? _currentForestChoice = null;
 
     private void Awake()
     {
@@ -67,6 +68,27 @@ public class GameManager : MonoBehaviour
         if (isSafe) SafeCoins++;
         else PiggyCoins++;
         Debug.Log($"[GameManager] Coin deposited — Safe:{SafeCoins} Piggy:{PiggyCoins}");
+
+        if (_currentForestChoice != isSafe)
+        {
+            _currentForestChoice = isSafe;
+            if (isSafe)
+            {
+                if (ForestManage.Instance != null)
+                    ForestManage.Instance.OnMakeParentChoice();
+                else
+                    Debug.LogWarning("[GameManager] ForestManage.Instance = NULL → Vault 安全選擇未觸發！");
+                Debug.Log("[GameManager] Vault 硬幣入庫（安全選擇）→ ForestManage.OnMakeParentChoice()");
+            }
+            else
+            {
+                if (ForestManage.Instance != null)
+                    ForestManage.Instance.OnMakeSelfChoice();
+                else
+                    Debug.LogWarning("[GameManager] ForestManage.Instance = NULL → PiggyBank 危險選擇未觸發！");
+                Debug.Log("[GameManager] PiggyBank 硬幣入庫（危險選擇）→ ForestManage.OnMakeSelfChoice()");
+            }
+        }
     }
 
     public void FinalizeAndCompleteMoneyEvent()
@@ -75,16 +97,7 @@ public class GameManager : MonoBehaviour
         ChoseSafe = SafeCoins >= PiggyCoins;
         Debug.Log($"[GameManager] Money finalized — ChoseSafe:{ChoseSafe} (Safe:{SafeCoins} Piggy:{PiggyCoins})");
 
-        if (ChoseSafe)
-        {
-            if (ForestManage.Instance != null) ForestManage.Instance.OnMakeParentChoice();
-            Debug.Log("[GameManager] Vault 獲勝（安全選擇）→ ForestManage.OnMakeParentChoice()");
-        }
-        else
-        {
-            if (ForestManage.Instance != null) ForestManage.Instance.OnMakeSelfChoice();
-            Debug.Log("[GameManager] PiggyBank 獲勝（危險選擇）→ ForestManage.OnMakeSelfChoice()");
-        }
+        Debug.Log($"[GameManager] Money event finalized — final choice: {(ChoseSafe ? "Vault 安全" : "PiggyBank 危險")} (ForestManage already updated per deposit)");
 
         CompleteEvent(3);
     }
