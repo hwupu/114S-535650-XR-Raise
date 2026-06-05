@@ -1,24 +1,21 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement; // 用於切換場景
-// GameProgressDoor.Instance.RecordEvent("EventID");
+using UnityEngine.SceneManagement;
 
 public class GameProgressDoor : MonoBehaviour
 {
     public static GameProgressDoor Instance;
 
-    [Header("--- 遊戲進度與結局設定 ---")]
-    public int totalEventsRequired = 5;   
-    public bool choseCS = false;             // true=資工, false=音樂
-
-    [Header("--- 場景切換設定 (如果結局在不同 Scene) ---")]
-    public string csEndingSceneName = "Scene3";     
+    [Header("場景切換設定")]
+    public string csEndingSceneName    = "Scene3";
     public string musicEndingSceneName = "Scene4";
-    
-    private List<string> completedEvents = new List<string>(); 
 
-    private bool hasTriggeredDoor = false;
+    [Header("Debug — Play Mode 勾選即觸發，自動取消")]
+    [SerializeField] private bool debugCompleteCS;    // 勾選 → 完成全部事件（資工）
+    [SerializeField] private bool debugCompleteMusic; // 勾選 → 完成全部事件（音樂）
+
+    private bool _triggered;
+    private static readonly WaitForSeconds _resetWait = new(3f);
 
     void Awake()
     {
@@ -26,76 +23,71 @@ public class GameProgressDoor : MonoBehaviour
         else Destroy(gameObject);
     }
 
-    public void RecordEvent(string eventID)
+    private void Update()
     {
-        if (!completedEvents.Contains(eventID))
+        if (debugCompleteCS)
         {
-            completedEvents.Add(eventID);
-            Debug.Log($"[進度更新] 事件 '{eventID}' 已完成！目前進度：{completedEvents.Count} / {totalEventsRequired}");
+            debugCompleteCS = false;
+            Debug.Log("[GameProgressDoor] Debug: 強制完成全部事件（資工路線）");
+            ForceCompleteAllEvents(isCS: true);
         }
-        else
+        if (debugCompleteMusic)
         {
-            Debug.Log($"事件 '{eventID}' 已經解過了，不重複計算。");
+            debugCompleteMusic = false;
+            Debug.Log("[GameProgressDoor] Debug: 強制完成全部事件（音樂路線）");
+            ForceCompleteAllEvents(isCS: false);
         }
     }
 
-    // 選擇資工系
-    public void SelectComputerScience()
+    private void ForceCompleteAllEvents(bool isCS)
     {
-        choseCS = true;
-        RecordEvent("MajorDecision");
-        Debug.Log("玩家選擇了：資工系");
-    }
+        var gm = GameManager.Instance;
+        if (gm == null) { Debug.LogWarning("[GameProgressDoor] GameManager.Instance = null"); return; }
 
-    // 選擇音樂系
-    public void SelectMusic()
-    {
-        choseCS = false;
-        RecordEvent("MajorDecision");
-        Debug.Log("玩家選擇了：音樂系");
-    }
+        gm.RecordDepartmentChoice(isCS);
+        gm.CompleteEvent(2);
+        gm.FinalizeAndCompleteMoneyEvent();
 
+        Debug.Log($"[GameProgressDoor] 進度: {gm.CompletedEvents}/3，科系: {(isCS ? "資工" : "音樂")}。直接觸發轉場...");
+        _triggered = false;
+        CheckProgressAndTransition();
+    }
 
     private void OnTriggerEnter(Collider other)
     {
-
-        if (other.CompareTag("Player") && !hasTriggeredDoor)
-        {
-            hasTriggeredDoor = true; // 立刻上鎖，避免重複執行
-            Debug.Log("玩家跨過門檻，開始結算進度...");
-
-            CheckProgressAndTransition();
-        }
+        if (!other.CompareTag("Player") || _triggered) return;
+        _triggered = true;
+        Debug.Log("[GameProgressDoor] 玩家跨過門檻，開始結算進度...");
+        CheckProgressAndTransition();
     }
-
 
     private void CheckProgressAndTransition()
     {
-        // 如果完成的事件數量達標
-        if (completedEvents.Count >= totalEventsRequired)
+        var gm = GameManager.Instance;
+        if (gm == null)
         {
-            if (choseCS)
-            {
-                Debug.Log("➡️ 條件達成：進入【場景三：資工系結局】");
-                SceneManager.LoadScene(csEndingSceneName); 
-            }
-            else
-            {
-                Debug.Log("➡️ 條件達成：進入【場景四：音樂系結局】");
-                SceneManager.LoadScene(musicEndingSceneName);
-            }
+            Debug.LogWarning("[GameProgressDoor] GameManager.Instance = null，無法結算。");
+            StartCoroutine(ResetLock());
+            return;
+        }
+
+        if (gm.CompletedEvents >= 3)
+        {
+            bool isCS = gm.ChoseCSDepartment == true;
+            string sceneName = isCS ? csEndingSceneName : musicEndingSceneName;
+            Debug.Log($"[GameProgressDoor] 全部完成 → 載入【{sceneName}】");
+            SceneManager.LoadScene(sceneName);
         }
         else
         {
-            Debug.Log($"進度未滿 ({completedEvents.Count}/{totalEventsRequired})，只是普通的回家...");
-
-            StartCoroutine(ResetDoorLock());
+            Debug.Log($"[GameProgressDoor] 進度未滿 ({gm.CompletedEvents}/3)，普通的回家...");
+            StartCoroutine(ResetLock());
         }
     }
 
-    private IEnumerator ResetDoorLock()
+    private IEnumerator ResetLock()
     {
-        yield return new WaitForSeconds(3f);
-        hasTriggeredDoor = false;
+        yield return _resetWait;
+        _triggered = false;
     }
 }
