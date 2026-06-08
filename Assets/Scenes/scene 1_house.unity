@@ -985,11 +985,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa3f78ecf18b3b4cab9fd6867922ab8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventNumber: 2
-  totalTime: 180
-  warningClip: {fileID: 0}
-  timerDisplay: {fileID: 0}
-  enableDebugTrigger: 1
 --- !u!82 &54555504
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1295,44 +1290,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 75992124}
   m_PrefabAsset: {fileID: 0}
---- !u!84 &76158113
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 5
-  m_Width: 128
-  m_Height: 128
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthStencilFormat: 94
-  m_ColorFormat: 0
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 0
-  m_UseDynamicScale: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_EnableRandomWrite: 0
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 1
-    m_WrapV: 1
-    m_WrapW: 1
-  m_Dimension: 2
-  m_VolumeDepth: 1
-  m_ShadowSamplingMode: 2
 --- !u!1001 &78098167
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3535,7 +3492,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 1652415735}
+        m_Texture: {fileID: 702117057}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
@@ -3560,7 +3517,7 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _DetailColor: {r: 0.575, g: 0.575, b: 0.575, a: 0}
     - _DetailData: {r: 0.5, g: 4, b: -0.5, a: 0}
-    - _DetailWindDirection: {r: -2.6115787, g: 0, b: 0, a: 0}
+    - _DetailWindDirection: {r: -1.404059, g: 0, b: 0, a: 0}
     - _DistanceData: {r: 0, g: 5, b: 1, a: 1}
     - _FogOfWarCenter: {r: 0, g: 0, b: 0, a: 1}
     - _FogOfWarCenterAdjusted: {r: 0, g: 0, b: 0, a: 1}
@@ -3571,7 +3528,7 @@ Material:
     - _ShadowData: {r: 0.5, g: 0, b: 10000, a: 0}
     - _SpecularColor: {r: 0.5, g: 0.5, b: 0.5, a: 0}
     - _SunDir: {r: 0.8473388, g: 0.44549906, b: -0.28904617, a: 0}
-    - _WindDirection: {r: -2.6115787, g: 0, b: 0, a: 0}
+    - _WindDirection: {r: -1.404059, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!4 &177621649 stripped
 Transform:
@@ -7266,7 +7223,7 @@ Camera:
     serializedVersion: 2
     m_Bits: 4294967293
   m_RenderingPath: -1
-  m_TargetTexture: {fileID: 76158113}
+  m_TargetTexture: {fileID: 902845534}
   m_TargetDisplay: 0
   m_TargetEye: 0
   m_HDR: 0
@@ -7377,7 +7334,7 @@ Transform:
   m_GameObject: {fileID: 421142424}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.926, y: 5.183, z: -1.3141102}
+  m_LocalPosition: {x: 8.926, y: 6.13, z: -1.3141102}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8645,6 +8602,7 @@ MonoBehaviour:
   phoneObject: {fileID: 1023634876}
   phoneRingingSource: {fileID: 466779415}
   momAudioSource: {fileID: 466779415}
+  houseBgm: {fileID: 466779415}
   ceilingTransform: {fileID: 243926492}
   roomMainLight: {fileID: 764404345}
   playerCameraTransform: {fileID: 930646220}
@@ -8652,11 +8610,35 @@ MonoBehaviour:
     type: 3}
   spawnRadius: 3
   phase1Lines:
-  - voiceClip: {fileID: 8300000, guid: dcad7c2d7ed09a94991c2cd02132f1d6, type: 3}
-    subtitleText: go study!
+  - voiceClip: {fileID: 8300000, guid: a6a3c6eb0b720da49900f6a8a82fffdf, type: 3}
+    subtitleText: Unrealistic.
+  - voiceClip: {fileID: 8300000, guid: 4ad2676c6073bf348bee1e50beb7976d, type: 3}
+    subtitleText: Stop stalling already. Look how old you are!
+  - voiceClip: {fileID: 8300000, guid: cca8e4718284b1946a1a7f7936e293eb, type: 3}
+    subtitleText: You think it's that easy? Stop dreaming.
+  - voiceClip: {fileID: 8300000, guid: 2d15089866415644495a6cdccd12fe7f, type: 3}
+    subtitleText: Have you actually thought this through?
+  - voiceClip: {fileID: 8300000, guid: 5f3930f392e832d41bcd00318f4a6ad3, type: 3}
+    subtitleText: What are you still hesitating for? Time waits for no one.
   phase2Lines:
-  - voiceClip: {fileID: 8300000, guid: 283a7a87403d52447a275af1d20954ad, type: 3}
-    subtitleText: sssssssssssss
+  - voiceClip: {fileID: 8300000, guid: f3851ecd4160695469810fdc77ccdaff, type: 3}
+    subtitleText: How much money can you even make doing that?
+  - voiceClip: {fileID: 8300000, guid: 8f275e1a1ff6b1841a72778304a70c6f, type: 3}
+    subtitleText: There is no future in doing this.
+  - voiceClip: {fileID: 8300000, guid: eb2e105b6cad7ca47b467e1d50f64814, type: 3}
+    subtitleText: Everyone else is way ahead of you.
+  - voiceClip: {fileID: 8300000, guid: e04f6e716880cbd469c5863a3f12b4d3, type: 3}
+    subtitleText: Why would I ever hurt you? It's all for your own good.
+  - voiceClip: {fileID: 8300000, guid: d6701949be2f0b24da36990740669ce4, type: 3}
+    subtitleText: I'm doing this for your own good.
+  - voiceClip: {fileID: 8300000, guid: 77c5df8be57a1924dba9a1d7d42a1156, type: 3}
+    subtitleText: You'll understand when you're older. Just listen to me, I know
+      what's best.
+  - voiceClip: {fileID: 8300000, guid: 009785326d456b44aa5172d0346ace66, type: 3}
+    subtitleText: You can't feed yourself on hobbies alone.
+  - voiceClip: {fileID: 8300000, guid: 20404faeebc249e44b4c545795c461cd, type: 3}
+    subtitleText: The longer you drag this out, the worse it gets. Just make up your
+      mind early
   catAudioSource: {fileID: 627700639}
   catEscapeClip: {fileID: 0}
   momFinalYellClip: {fileID: 0}
@@ -12300,11 +12282,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa3f78ecf18b3b4cab9fd6867922ab8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventNumber: 3
-  totalTime: 180
-  warningClip: {fileID: 0}
-  timerDisplay: {fileID: 0}
-  enableDebugTrigger: 1
 --- !u!82 &638271134
 AudioSource:
   m_ObjectHideFlags: 0
@@ -13651,6 +13628,44 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 692082647}
   m_Mesh: {fileID: -1669897027295204831, guid: 2c8ae408ff514314a9902d6f40850b46, type: 3}
+--- !u!84 &702117057
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 5
+  m_Width: 256
+  m_Height: 256
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthStencilFormat: 0
+  m_ColorFormat: 8
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 0
+  m_UseDynamicScale: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_EnableRandomWrite: 0
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 0
+    m_WrapV: 0
+    m_WrapW: 0
+  m_Dimension: 2
+  m_VolumeDepth: 1
+  m_ShadowSamplingMode: 2
 --- !u!1 &703886944
 GameObject:
   m_ObjectHideFlags: 0
@@ -14287,6 +14302,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: closedoor
+      objectReference: {fileID: 0}
+    - target: {fileID: 2950770442456443061, guid: a02618aac07eccb459bad8115272ebb1,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -17917,6 +17937,44 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 902052726}
   m_PrefabAsset: {fileID: 0}
+--- !u!84 &902845534
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 5
+  m_Width: 128
+  m_Height: 128
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthStencilFormat: 94
+  m_ColorFormat: 0
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 0
+  m_UseDynamicScale: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_EnableRandomWrite: 0
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 0
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_Dimension: 2
+  m_VolumeDepth: 1
+  m_ShadowSamplingMode: 2
 --- !u!1 &903702283
 GameObject:
   m_ObjectHideFlags: 0
@@ -18289,22 +18347,22 @@ PrefabInstance:
     - target: {fileID: 1200023196244501507, guid: cf178f1fce5b6fc419737c3201864d8b,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2.797
+      value: 8.926
       objectReference: {fileID: 0}
     - target: {fileID: 1200023196244501507, guid: cf178f1fce5b6fc419737c3201864d8b,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 4.838
+      value: 5.23
       objectReference: {fileID: 0}
     - target: {fileID: 1200023196244501507, guid: cf178f1fce5b6fc419737c3201864d8b,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.012
+      value: -1.3141102
       objectReference: {fileID: 0}
     - target: {fileID: 1200023196244501507, guid: cf178f1fce5b6fc419737c3201864d8b,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.6957244
+      value: 0.07046519
       objectReference: {fileID: 0}
     - target: {fileID: 1200023196244501507, guid: cf178f1fce5b6fc419737c3201864d8b,
         type: 3}
@@ -18314,7 +18372,7 @@ PrefabInstance:
     - target: {fileID: 1200023196244501507, guid: cf178f1fce5b6fc419737c3201864d8b,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.71830887
+      value: -0.99751425
       objectReference: {fileID: 0}
     - target: {fileID: 1200023196244501507, guid: cf178f1fce5b6fc419737c3201864d8b,
         type: 3}
@@ -18329,7 +18387,7 @@ PrefabInstance:
     - target: {fileID: 1200023196244501507, guid: cf178f1fce5b6fc419737c3201864d8b,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: -268.16998
+      value: -171.919
       objectReference: {fileID: 0}
     - target: {fileID: 1200023196244501507, guid: cf178f1fce5b6fc419737c3201864d8b,
         type: 3}
@@ -18349,7 +18407,7 @@ PrefabInstance:
     - target: {fileID: 3169026656875194969, guid: cf178f1fce5b6fc419737c3201864d8b,
         type: 3}
       propertyPath: _trackingOriginType
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3169026656875194969, guid: cf178f1fce5b6fc419737c3201864d8b,
         type: 3}
@@ -19964,7 +20022,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &990530278
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24528,6 +24586,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: house
       objectReference: {fileID: 0}
+    - target: {fileID: 2950770442456443061, guid: dd933f84970876e4aa7d6c6c44857047,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -25767,11 +25830,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa3f78ecf18b3b4cab9fd6867922ab8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventNumber: 1
-  totalTime: 180
-  warningClip: {fileID: 0}
-  timerDisplay: {fileID: 0}
-  enableDebugTrigger: 1
 --- !u!82 &1275501304
 AudioSource:
   m_ObjectHideFlags: 0
@@ -27467,7 +27525,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -30265,7 +30323,7 @@ Transform:
   m_GameObject: {fileID: 1510034192}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10.162, y: 0.07999992, z: 1.14}
+  m_LocalPosition: {x: 12.02, y: 0.07999992, z: 1.14}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -33174,44 +33232,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1651148284}
   m_PrefabAsset: {fileID: 0}
---- !u!84 &1652415735
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 5
-  m_Width: 256
-  m_Height: 256
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthStencilFormat: 0
-  m_ColorFormat: 8
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 0
-  m_UseDynamicScale: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_EnableRandomWrite: 0
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 0
-    m_WrapV: 0
-    m_WrapW: 0
-  m_Dimension: 2
-  m_VolumeDepth: 1
-  m_ShadowSamplingMode: 2
 --- !u!1 &1652996911
 GameObject:
   m_ObjectHideFlags: 0
@@ -41501,6 +41521,23 @@ PrefabInstance:
     - target: {fileID: 1779893345556738157, guid: eb8331adb58181240b9e80b49b6c811a,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3890347290970639317, guid: eb8331adb58181240b9e80b49b6c811a,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: -7866878248917565295, guid: fdb6d46e221118b40993b176f2971e14,
+        type: 2}
+    - target: {fileID: 5195331913372219759, guid: eb8331adb58181240b9e80b49b6c811a,
+        type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: -7866878248917565295, guid: fdb6d46e221118b40993b176f2971e14,
+        type: 2}
+    - target: {fileID: 5195331913372219759, guid: eb8331adb58181240b9e80b49b6c811a,
+        type: 3}
+      propertyPath: m_hasFontAssetChanged
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5311829380810998260, guid: eb8331adb58181240b9e80b49b6c811a,

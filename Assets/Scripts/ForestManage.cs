@@ -52,10 +52,12 @@ public class ForestManage : MonoBehaviour
     void Start()
     {
         if (stoneRingTransform != null)
-        {
             targetY = stoneRingTransform.position.y;
-        }
         playerHealth = 3;
+    }
+
+    public void StartBGM()
+    {
         if (bgmAudioSource != null && bgmClip != null)
         {
             bgmAudioSource.clip = bgmClip;

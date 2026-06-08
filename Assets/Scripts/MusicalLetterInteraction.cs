@@ -162,7 +162,6 @@ public class MusicalLetterInteraction : MonoBehaviour
         if (normalised == TargetPhrase)
         {
             _state = State.Chosen;
-            AdmissionLetterChoice.MarkEventDone();
             _keyboard.Hide();
             StopPulse();
             GameManager.Instance?.RecordDepartmentChoice(false);

@@ -14,7 +14,7 @@ public class PotionPour : MonoBehaviour
     private bool _forcePoured;
 
     public bool IsHeld    => _rb != null && _rb.isKinematic;
-    public bool IsPoured  => _forcePoured || (IsHeld && transform.up.y < tiltThreshold);
+    public bool IsPoured  => _forcePoured || transform.up.y < tiltThreshold;
 
     private void Awake() => _rb = GetComponent<Rigidbody>();
 

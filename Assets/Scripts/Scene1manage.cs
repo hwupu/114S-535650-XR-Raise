@@ -13,6 +13,9 @@ public class Scene1manage : MonoBehaviour
     public AudioSource phoneRingingSource;
     public AudioSource momAudioSource;  
 
+    [Header("--- 背景音樂 ---")]
+    public AudioSource houseBgm;
+
     [Header("--- 環境物件連結 ---")]
     public Transform ceilingTransform;
     public Light roomMainLight;
@@ -40,7 +43,7 @@ public class Scene1manage : MonoBehaviour
     public AudioClip catEscapeClip;              
     public AudioClip momFinalYellClip;           
     [TextArea]
-    public string momFinalYellText = "整天只知道出去玩！你最好給我10分鐘內回家！";
+    public string momFinalYellText = ".";
 
     [Header("--- 場景轉移設定 ---")]
     public Transform playerRig;                  
@@ -83,6 +86,8 @@ public class Scene1manage : MonoBehaviour
         if (firstDoor != null) firstDoor.SetActive(true);
         if (secondDoor != null) secondDoor.SetActive(false);
 
+        if (houseBgm != null) houseBgm.Play();
+
         if (!hasPlayedMainStory)
         {
             phoneRingingSource.Play();
@@ -101,25 +106,21 @@ public class Scene1manage : MonoBehaviour
 
     IEnumerator PlayScene1Script()
     {
-        hasPlayedMainStory = true; 
+        hasPlayedMainStory = true;
 
         Debug.Log("first stage");
 
-        //第一階段
         currentPhase = GamePhase.Phase1_Oppressive;
         ceilingSinkSpeed = 0.05f;
-        textShootForce = 4f;  
+        textShootForce = 4f;
         lightFlickerSpeed = 0.8f;
         StartCoroutine(LightFlickerLoop());
 
         foreach (var line in phase1Lines)
-        {
-            if (isEscaping) yield break; 
             yield return StartCoroutine(PlayLineAndSpawnText(line));
-        }
+
         yield return new WaitForSeconds(3f);
 
-        //第二階段
         Debug.Log("second stage");
         currentPhase = GamePhase.Phase2_Panic;
         ceilingSinkSpeed = 0.25f;
@@ -127,16 +128,10 @@ public class Scene1manage : MonoBehaviour
         lightFlickerSpeed = 0.15f;
 
         foreach (var line in phase2Lines)
-        {
-            if (isEscaping) yield break;
-            if (ceilingTransform.position.y <= 1.3f) break;
             yield return StartCoroutine(PlayLineAndSpawnText(line));
-        }
 
-        if (!isEscaping)
-        {
-            TriggerFinalEscapeSequence();
-        }
+        // 所有 clip 播完 → 進入逃跑序列
+        yield return StartCoroutine(EscapeSequenceCoroutine());
     }
 
     IEnumerator PlayLineAndSpawnText(VoiceSubtitlePair line)
@@ -152,7 +147,6 @@ public class Scene1manage : MonoBehaviour
 
         while (elapsed < clipDuration)
         {
-            if (isEscaping) yield break; 
             SpawnTextInPlayerView(line.subtitleText);
             yield return new WaitForSeconds(spawnInterval);
             elapsed += spawnInterval;
@@ -199,11 +193,6 @@ public class Scene1manage : MonoBehaviour
         if (currentPhase == GamePhase.Phase1_Oppressive || currentPhase == GamePhase.Phase2_Panic)
         {
             ceilingTransform.Translate(Vector3.down * ceilingSinkSpeed * Time.deltaTime, Space.World);
-
-            if (ceilingTransform.position.y <= 1.2f && !isEscaping)
-            {
-                TriggerFinalEscapeSequence();
-            }
         }
     }
 
@@ -216,35 +205,33 @@ public class Scene1manage : MonoBehaviour
         }
     }
 
-    void TriggerFinalEscapeSequence()
+IEnumerator EscapeSequenceCoroutine()
     {
-        if (isEscaping) return;
         isEscaping = true;
         currentPhase = GamePhase.Phase3_Escape;
+        ceilingSinkSpeed = 0f;
 
-        Debug.Log("第三階段：貓咪介入，準備逃跑！");
-        
-        StopAllCoroutines(); 
-        if (momAudioSource != null) momAudioSource.Stop();
-        
-        StartCoroutine(EscapeSequenceCoroutine());
-    }
+        if (houseBgm != null) houseBgm.Stop();
+        if (momAudioSource != null && momAudioSource.isPlaying)
+            momAudioSource.Stop();
 
-    IEnumerator EscapeSequenceCoroutine()
-    {
+        ForestManage.Instance?.StartBGM();
+
         if (roomMainLight != null)
         {
             roomMainLight.enabled = true;
-            roomMainLight.intensity = initialLightIntensity * 0.5f; 
+            roomMainLight.intensity = initialLightIntensity * 0.5f;
         }
 
+        // 播 catEscapeClip，等它播完
         if (catAudioSource != null && catEscapeClip != null)
         {
             catAudioSource.clip = catEscapeClip;
             catAudioSource.Play();
-            yield return new WaitForSeconds(catEscapeClip.length);
+            yield return new WaitUntil(() => !catAudioSource.isPlaying);
         }
 
+        // 播 momFinalYellClip，等它播完
         if (momAudioSource != null && momFinalYellClip != null)
         {
             momAudioSource.clip = momFinalYellClip;
@@ -254,10 +241,10 @@ public class Scene1manage : MonoBehaviour
             while (elapsed < momFinalYellClip.length)
             {
                 SpawnTextInPlayerView(momFinalYellText);
-                yield return new WaitForSeconds(0.2f); 
+                yield return new WaitForSeconds(0.2f);
                 elapsed += 0.2f;
             }
-            yield return new WaitWhile(() => momAudioSource.isPlaying);
+            yield return new WaitUntil(() => !momAudioSource.isPlaying);
         }
 
         if (roomMainLight != null) roomMainLight.enabled = false;
@@ -319,8 +306,7 @@ public class Scene1manage : MonoBehaviour
             Debug.Log("解鎖新路線：第二個門已顯示。");
         }
 
-        // 如果你希望在顯示新門的同時，把原本的第一個門關掉，可以把下面這行的註解拿掉：
-        // if (firstDoor != null) firstDoor.SetActive(false);
+         if (firstDoor != null) firstDoor.SetActive(false);
 
         currentPhase = GamePhase.Phase0_Normal;
         isEscaping = false;

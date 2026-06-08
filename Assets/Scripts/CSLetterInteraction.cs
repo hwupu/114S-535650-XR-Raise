@@ -152,7 +152,6 @@ public class CSLetterInteraction : MonoBehaviour
         if (_typedText.ToLower() == "world")
         {
             _state = State.Chosen;
-            AdmissionLetterChoice.MarkEventDone();
             _keyboard.Hide();
             StopPulse();
             GameManager.Instance?.RecordDepartmentChoice(true);

@@ -86,8 +86,9 @@ public class HitBook : MonoBehaviour
             rb.AddForce(transform.forward * 3f, ForceMode.Impulse); 
         }
        
-        // 停用 Collider 防止重複觸發，並在 3 秒後把物件清掉
-        GetComponent<Collider>().enabled = false;
+        // 停用全部 Collider（可能同時有 Trigger + MeshCollider）
+        foreach (var col in GetComponents<Collider>())
+            col.enabled = false;
         Destroy(gameObject, 3f);
     }
 }

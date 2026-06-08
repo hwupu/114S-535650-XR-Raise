@@ -32,19 +32,20 @@ public class InjuredCat : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (_healed) return;
-        if (!other.TryGetComponent<PotionPour>(out var potion)) return;
-        if (!potion.IsPoured) return;   // must be tilted past tiltThreshold (-0.5f)
+        var potion = other.GetComponentInParent<PotionPour>();
+        if (potion == null) return;
+        if (!potion.IsPoured) return;
 
         Debug.Log("[InjuredCat] Potion poured on entry — healing cat!");
         Heal();
     }
 
-    // Scenario B: player brings potion to cat first, THEN tilts while inside trigger.
     private void OnTriggerStay(Collider other)
     {
         if (_healed) return;
-        if (!other.TryGetComponent<PotionPour>(out var potion)) return;
-        if (!potion.IsPoured) return;   // must be tilted past tiltThreshold (-0.5f)
+        var potion = other.GetComponentInParent<PotionPour>();
+        if (potion == null) return;
+        if (!potion.IsPoured) return;
 
         Debug.Log("[InjuredCat] Potion poured while in range — healing cat!");
         Heal();
