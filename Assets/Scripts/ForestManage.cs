@@ -19,8 +19,11 @@ public class ForestManage : MonoBehaviour
     public AudioClip stoneMoveClip;            
     public AudioSource playerAudioSource;      // 掛在玩家
     public AudioClip damageClip;               // 被撞擊
-    public AudioSource bgmAudioSource;         // 背景音樂
-    public AudioClip bgmClip;  
+    public AudioSource bgmAudioSource;         // 背景音樂 1
+    public AudioClip bgmClip;
+    public AudioSource bgmAudioSource2;        // 背景音樂 2
+    public AudioClip bgmClip2;
+    
    
 
 

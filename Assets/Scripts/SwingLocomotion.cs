@@ -19,7 +19,7 @@ public class SwingLocomotion : MonoBehaviour
 
     [Header("Gravity")]
     [SerializeField] private float gravityMultiplier = 2.0f;
-    [SerializeField] private float stickToGroundForce = 10f;
+    [SerializeField] private float stickToGroundForce = 2f;
 
 #if UNITY_EDITOR
     [Header("── Debug Info (read-only) ──")]
@@ -42,6 +42,10 @@ public class SwingLocomotion : MonoBehaviour
     // right controller Button A (Button.One) toggles locomotion on/off
     private bool _locomotionEnabled = true;
 
+    // ── Debug 用：追蹤 isGrounded 狀態變化 ──
+    private bool  _prevGrounded = true;
+    private float _debugLogTimer = 0f;
+
     private void Awake()
     {
         _cc = GetComponent<CharacterController>();
@@ -59,6 +63,13 @@ public class SwingLocomotion : MonoBehaviour
         _leftPrevPos  = _leftHand.position;
         _rightPrevPos = _rightHand.position;
         _prevRigPos   = transform.position;
+    }
+
+    // Called by GameProgressDoor after teleport to clear residual gravity velocity
+    public void ResetVelocity()
+    {
+        _verticalVelocity = 0f;
+        _currentSpeed = 0f;
     }
 
     // Called by BodyShapeManager whenever weight changes; t=0 lightest, t=1 heaviest
@@ -153,14 +164,29 @@ public class SwingLocomotion : MonoBehaviour
         if (headFwdFinal.sqrMagnitude < 0.001f) headFwdFinal = transform.forward;
         headFwdFinal.Normalize();
 
-        _verticalVelocity = _cc.isGrounded
-            ? -stickToGroundForce
-            : _verticalVelocity + Physics.gravity.y * gravityMultiplier * dt;
+        // 標準模式：下落時才 snap 到地面，上升中不重置
+        if (_cc.isGrounded && _verticalVelocity < 0f)
+            _verticalVelocity = -stickToGroundForce;
+        else if (!_cc.isGrounded)
+            _verticalVelocity += Physics.gravity.y * gravityMultiplier * dt;
 
         _cc.Move(new Vector3(
             headFwdFinal.x * _currentSpeed,
             _verticalVelocity,
             headFwdFinal.z * _currentSpeed) * dt);
+
+        // ── Debug：isGrounded 狀態改變時 log，每 2 秒也輸出一次垂直速度 ──
+        if (_cc.isGrounded != _prevGrounded)
+        {
+            Debug.Log($"[Swing-診斷] isGrounded 變為 {_cc.isGrounded}  vertVel={_verticalVelocity:F3}  pos={transform.position}");
+            _prevGrounded = _cc.isGrounded;
+        }
+        _debugLogTimer += dt;
+        if (_debugLogTimer >= 2f)
+        {
+            _debugLogTimer = 0f;
+            Debug.Log($"[Swing-診斷] isGrounded={_cc.isGrounded}  vertVel={_verticalVelocity:F3}  pos={transform.position}");
+        }
     }
 
 #if UNITY_EDITOR

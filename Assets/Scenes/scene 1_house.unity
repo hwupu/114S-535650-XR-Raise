@@ -8561,7 +8561,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &466779413
 Transform:
   m_ObjectHideFlags: 0
@@ -8593,7 +8593,7 @@ MonoBehaviour:
   phoneObject: {fileID: 1023634876}
   phoneRingingSource: {fileID: 466779415}
   momAudioSource: {fileID: 466779415}
-  houseBgm: {fileID: 466779415}
+  houseBgm: {fileID: 838170894}
   ceilingTransform: {fileID: 243926492}
   roomMainLight: {fileID: 764404345}
   playerCameraTransform: {fileID: 930646220}
@@ -8602,34 +8602,32 @@ MonoBehaviour:
   spawnRadius: 3
   phase1Lines:
   - voiceClip: {fileID: 8300000, guid: a6a3c6eb0b720da49900f6a8a82fffdf, type: 3}
-    subtitleText: Unrealistic.
+    subtitleText: "\u4E0D\u5207\u5BE6\u969B"
   - voiceClip: {fileID: 8300000, guid: 4ad2676c6073bf348bee1e50beb7976d, type: 3}
-    subtitleText: Stop stalling already. Look how old you are!
+    subtitleText: "\u4E0D\u8981\u518D\u62D6\u4E86\u5DF2\u7D93\u5E7E\u6B72\u4E86"
   - voiceClip: {fileID: 8300000, guid: cca8e4718284b1946a1a7f7936e293eb, type: 3}
-    subtitleText: You think it's that easy? Stop dreaming.
+    subtitleText: "\u4F60\u4EE5\u70BA\u5F88\u7C21\u55AE\u55CE\u5225\u505A\u5922\u4E86"
   - voiceClip: {fileID: 8300000, guid: 2d15089866415644495a6cdccd12fe7f, type: 3}
-    subtitleText: Have you actually thought this through?
+    subtitleText: "\u4F60\u60F3\u6E05\u695A\u4E86\u6C92"
   - voiceClip: {fileID: 8300000, guid: 5f3930f392e832d41bcd00318f4a6ad3, type: 3}
-    subtitleText: What are you still hesitating for? Time waits for no one.
+    subtitleText: "\u4F60\u9084\u5728\u7336\u8C6B\u751A\u9EBC\uFF01\u6642\u9593\u4E0D\u7B49\u4EBA"
   phase2Lines:
   - voiceClip: {fileID: 8300000, guid: f3851ecd4160695469810fdc77ccdaff, type: 3}
-    subtitleText: How much money can you even make doing that?
+    subtitleText: "\u4F60\u90A3\u500B\u80FD\u8CFA\u751A\u9EBC\u9322"
   - voiceClip: {fileID: 8300000, guid: 8f275e1a1ff6b1841a72778304a70c6f, type: 3}
-    subtitleText: There is no future in doing this.
+    subtitleText: "\u505A\u9019\u500B\u6C92\u524D\u9014"
   - voiceClip: {fileID: 8300000, guid: eb2e105b6cad7ca47b467e1d50f64814, type: 3}
-    subtitleText: Everyone else is way ahead of you.
+    subtitleText: "\u5225\u4EBA\u65E9\u5C31\u8DD1\u5728\u524D\u9762\u4E86"
   - voiceClip: {fileID: 8300000, guid: e04f6e716880cbd469c5863a3f12b4d3, type: 3}
-    subtitleText: Why would I ever hurt you? It's all for your own good.
+    subtitleText: "\u6211\u54EA\u6703\u5BB3\u4F60\uFF0C\u90FD\u662F\u70BA\u4F60\u597D"
   - voiceClip: {fileID: 8300000, guid: d6701949be2f0b24da36990740669ce4, type: 3}
-    subtitleText: I'm doing this for your own good.
+    subtitleText: "\u6211\u662F\u70BA\u4F60\u597D"
   - voiceClip: {fileID: 8300000, guid: 77c5df8be57a1924dba9a1d7d42a1156, type: 3}
-    subtitleText: You'll understand when you're older. Just listen to me, I know
-      what's best.
+    subtitleText: "\u7B49\u59B3\u4EE5\u5F8C\u5C31\u61C2\u4E86\uFF0C\u807D\u6211\u7684\u4E0D\u6703\u932F"
   - voiceClip: {fileID: 8300000, guid: 009785326d456b44aa5172d0346ace66, type: 3}
-    subtitleText: You can't feed yourself on hobbies alone.
+    subtitleText: "\u8208\u8DA3\u4E0D\u80FD\u7576\u98EF\u5403"
   - voiceClip: {fileID: 8300000, guid: 20404faeebc249e44b4c545795c461cd, type: 3}
-    subtitleText: The longer you drag this out, the worse it gets. Just make up your
-      mind early
+    subtitleText: "\u8D8A\u62D6\u8D8A\u7CDF\uFF0C\u65E9\u9EDE\u6C7A\u5B9A"
   catAudioSource: {fileID: 627700639}
   catEscapeClip: {fileID: 0}
   momFinalYellClip: {fileID: 0}
@@ -9343,6 +9341,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   depositType: 1
   depositFX: {fileID: 1246680306}
+  audioSource: {fileID: 0}
+  depositSoundSafe: {fileID: 8300000, guid: 9dc0b38591c38b84e99fb3615f18d730, type: 3}
+  depositSoundPiggy: {fileID: 8300000, guid: 9dc0b38591c38b84e99fb3615f18d730, type: 3}
   enableDebugTrigger: 1
 --- !u!1001 &517407623
 PrefabInstance:
@@ -9985,7 +9986,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a27e10b6eedfee74ba3927e9c73413ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hitCountToDestroy: 5
+  hitCountToDestroy: 2
 --- !u!65 &527605561
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -10003,7 +10004,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 0.20666954, y: 0.35120755, z: 0.062399995}
   m_Center: {x: 0.00396721, y: 0.17560372, z: 0.0000000046566124}
@@ -12050,7 +12051,7 @@ AudioSource:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 627700638}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
@@ -16487,6 +16488,134 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 836783545}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &838170893
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 838170895}
+  - component: {fileID: 838170894}
+  m_Layer: 0
+  m_Name: house_bgm
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!82 &838170894
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 838170893}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: cd67ab9ccb275c5488d3ee6b7f5e2df3, type: 3}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!4 &838170895
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 838170893}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.669806, y: 5.5590315, z: -0.9068751}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &841803511
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18413,12 +18542,17 @@ PrefabInstance:
     - target: {fileID: 3921855586888673084, guid: cf178f1fce5b6fc419737c3201864d8b,
         type: 3}
       propertyPath: maxSpeed
-      value: 7.18
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 3921855586888673084, guid: cf178f1fce5b6fc419737c3201864d8b,
         type: 3}
       propertyPath: speedSmoothing
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3921855586888673084, guid: cf178f1fce5b6fc419737c3201864d8b,
+        type: 3}
+      propertyPath: stickToGroundForce
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4991876271240858029, guid: cf178f1fce5b6fc419737c3201864d8b,
         type: 3}
@@ -18445,7 +18579,8 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Hand
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 9065992480457225747, guid: cf178f1fce5b6fc419737c3201864d8b, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -23400,6 +23535,53 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1156835218}
   m_Mesh: {fileID: -1669897027295204831, guid: 2c8ae408ff514314a9902d6f40850b46, type: 3}
+--- !u!1 &1158250188
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1158250190}
+  - component: {fileID: 1158250189}
+  m_Layer: 0
+  m_Name: BodyManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1158250189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1158250188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9b23485be612b14680485fbc27be9f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startWeight: 10
+  maxWeight: 30
+  swingLocomotion: {fileID: 1395836977}
+--- !u!4 &1158250190
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1158250188}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.0554068, y: 8.419901, z: -0.37631336}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1163188493
 GameObject:
   m_ObjectHideFlags: 0
@@ -27618,11 +27800,13 @@ MonoBehaviour:
   targetYPositionParent: 0
   moveSpeed: 2
   environmentAudioSource: {fileID: 1344919768}
-  stoneMoveClip: {fileID: 0}
+  stoneMoveClip: {fileID: 8300000, guid: bb7bdbcb10ed2ef4b9d86714c4da55a8, type: 3}
   playerAudioSource: {fileID: 1344919768}
   damageClip: {fileID: 0}
   bgmAudioSource: {fileID: 1344919768}
-  bgmClip: {fileID: 0}
+  bgmClip: {fileID: 8300000, guid: 18a12b3eaefb8864683713544a953537, type: 3}
+  bgmAudioSource2: {fileID: 1344919768}
+  bgmClip2: {fileID: 8300000, guid: 50fcda760610b1740af12f163fef49cb, type: 3}
   animalPrefab: {fileID: 24545529}
   animalSpawnPoints:
   - {fileID: 519948760}
@@ -28393,6 +28577,18 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1382248281}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1395836977 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3921855586888673084, guid: cf178f1fce5b6fc419737c3201864d8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 930646219}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fb41bb84f2455447883dc73e48c1346, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1397499577
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -30334,6 +30530,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   csEndingSceneName: Scene3
   musicEndingSceneName: Scene4
+  spawnPointName: PlayerSpawnPoint
   debugCompleteCS: 0
   debugCompleteMusic: 0
 --- !u!65 &1510034195
@@ -35146,6 +35343,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   depositType: 0
   depositFX: {fileID: 1246680306}
+  audioSource: {fileID: 0}
+  depositSoundSafe: {fileID: 8300000, guid: 9dc0b38591c38b84e99fb3615f18d730, type: 3}
+  depositSoundPiggy: {fileID: 8300000, guid: 9dc0b38591c38b84e99fb3615f18d730, type: 3}
   enableDebugTrigger: 1
 --- !u!1001 &1728149359
 PrefabInstance:
@@ -41518,7 +41718,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: -7866878248917565295, guid: fdb6d46e221118b40993b176f2971e14,
+      objectReference: {fileID: -1962742173541463807, guid: 48b02780d99b43c4d8bab481d0128e76,
         type: 2}
     - target: {fileID: 5195331913372219759, guid: eb8331adb58181240b9e80b49b6c811a,
         type: 3}
@@ -41745,6 +41945,7 @@ SceneRoots:
   - {fileID: 8636774019653051897}
   - {fileID: 1621483001}
   - {fileID: 930646219}
+  - {fileID: 1158250190}
   - {fileID: 466779413}
   - {fileID: 378181117}
   - {fileID: 460791466}
@@ -41770,3 +41971,4 @@ SceneRoots:
   - {fileID: 1695946936}
   - {fileID: 824058611}
   - {fileID: 1867382162}
+  - {fileID: 838170895}

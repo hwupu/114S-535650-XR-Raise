@@ -11,6 +11,11 @@ public class CoinDeposit : MonoBehaviour
     [SerializeField] private DepositType depositType;
     [SerializeField] private ParticleSystem depositFX;   // optional coin burst effect
 
+    [Header("音效")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip depositSoundSafe;   // 投入 Vault 音效
+    [SerializeField] private AudioClip depositSoundPiggy;  // 投入 PiggyBank 音效
+
     [Header("Debug")]
     [SerializeField] private bool enableDebugTrigger = true;
 
@@ -46,6 +51,12 @@ public class CoinDeposit : MonoBehaviour
         {
             depositFX.transform.position = other.transform.position;
             depositFX.Play();
+        }
+
+        if (audioSource != null)
+        {
+            AudioClip clip = isSafe ? depositSoundSafe : depositSoundPiggy;
+            if (clip != null) audioSource.PlayOneShot(clip);
         }
 
         Debug.Log($"[CoinDeposit] Coin deposited into {depositType}.");

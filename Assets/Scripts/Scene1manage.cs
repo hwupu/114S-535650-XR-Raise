@@ -111,7 +111,7 @@ public class Scene1manage : MonoBehaviour
         Debug.Log("first stage");
 
         currentPhase = GamePhase.Phase1_Oppressive;
-        ceilingSinkSpeed = 0.05f;
+        ceilingSinkSpeed = 0.01f;
         textShootForce = 4f;
         lightFlickerSpeed = 0.8f;
         StartCoroutine(LightFlickerLoop());
@@ -119,11 +119,10 @@ public class Scene1manage : MonoBehaviour
         foreach (var line in phase1Lines)
             yield return StartCoroutine(PlayLineAndSpawnText(line));
 
-        yield return new WaitForSeconds(3f);
 
         Debug.Log("second stage");
         currentPhase = GamePhase.Phase2_Panic;
-        ceilingSinkSpeed = 0.25f;
+        ceilingSinkSpeed = 0.05f;
         textShootForce = 10f;
         lightFlickerSpeed = 0.15f;
 
