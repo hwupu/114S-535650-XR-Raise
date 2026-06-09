@@ -103,7 +103,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u54C8\u56C9 \n"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: fdb6d46e221118b40993b176f2971e14, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 48b02780d99b43c4d8bab481d0128e76, type: 2}
   m_sharedMaterial: {fileID: -7866878248917565295, guid: fdb6d46e221118b40993b176f2971e14,
     type: 2}
   m_fontSharedMaterials: []
@@ -171,7 +171,7 @@ MonoBehaviour:
   _SortingLayer: 0
   _SortingLayerID: 0
   _SortingOrder: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_renderer: {fileID: 3890347290970639317}
   m_maskType: 0
 --- !u!54 &4413012768575497258
