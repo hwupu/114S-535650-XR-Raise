@@ -189,7 +189,7 @@ public class GameProgressDoor : MonoBehaviour
             return;
         }
 
-        if (gm.CompletedEvents >= 3)
+        if (gm.CompletedEvents >= 2)
         {
             bool isCS = gm.ChoseCSDepartment == true;
             string sceneName = isCS ? csEndingSceneName : musicEndingSceneName;

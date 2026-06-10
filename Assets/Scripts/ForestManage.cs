@@ -66,6 +66,9 @@ public class ForestManage : MonoBehaviour
             bgmAudioSource.clip = bgmClip;
             bgmAudioSource.loop = true;
             bgmAudioSource.Play();
+            bgmAudioSource2.clip = bgmClip2;
+            bgmAudioSource2.loop = true;
+            bgmAudioSource2.Play();
         }
     }
 

@@ -8,6 +8,10 @@ public class DumbbellExercise : MonoBehaviour
     [SerializeField] private float upVelThreshold    = 0.4f;
     [SerializeField] private float downVelThreshold  = 0.4f;
 
+    [Header("Sound")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip   repSound;
+
     [Header("Debug")]
     [SerializeField] private bool enableDebugTrigger = true;
 
@@ -51,7 +55,11 @@ public class DumbbellExercise : MonoBehaviour
         if (avgYVel > upVelThreshold)
         {
             if (_phase == Phase.MovingDown)
+            {
                 CurrentReps++;
+                if (audioSource != null && repSound != null)
+                    audioSource.PlayOneShot(repSound);
+            }
             _phase = Phase.MovingUp;
         }
         else if (avgYVel < -downVelThreshold)

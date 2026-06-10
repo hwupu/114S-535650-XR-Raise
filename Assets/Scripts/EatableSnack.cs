@@ -5,6 +5,9 @@ public class EatableSnack : MonoBehaviour
 {
     [SerializeField] private float eatDistance = 0.25f;
 
+    [Header("Sound")]
+    [SerializeField] private AudioClip eatSound;
+
     private Rigidbody _rb;
     private Transform _head;
 
@@ -27,6 +30,8 @@ public class EatableSnack : MonoBehaviour
     private void Eat()
     {
         BodyShapeManager.Instance?.AddWeight(3);
+        if (eatSound != null)
+            AudioSource.PlayClipAtPoint(eatSound, transform.position);
         Destroy(gameObject);
     }
 }

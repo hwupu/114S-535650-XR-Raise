@@ -16,6 +16,11 @@ public class CatManager : MonoBehaviour
     [Header("Paw Print")]
     [SerializeField] private float pawPrintSpacing = 0.4f;
 
+    [Header("Kitty Sound")]
+    [SerializeField] private AudioSource kittyAudioSource;
+    [SerializeField] private AudioClip   kittyClip;
+    [SerializeField] private float       kittyInterval = 5f;
+
     [Header("Debug")]
     [SerializeField] private bool enableDebugTrigger = true;
 
@@ -29,6 +34,7 @@ public class CatManager : MonoBehaviour
     private float   _lastTerrainY = 0f;
     private Vector3 _lastBodyPos;
     private Vector3 _bodyMoveDir;
+    private float   _kittySoundTimer;
 
     private void Awake() => Instance = this;
 
@@ -58,6 +64,16 @@ public class CatManager : MonoBehaviour
         {
             Debug.Log("[CatManager] Debug key C pressed — force cat rescue.");
             OnCatSaved();
+        }
+
+        if (CatSaved && kittyAudioSource != null && kittyClip != null)
+        {
+            _kittySoundTimer += Time.deltaTime;
+            if (_kittySoundTimer >= kittyInterval)
+            {
+                _kittySoundTimer = 0f;
+                kittyAudioSource.PlayOneShot(kittyClip);
+            }
         }
 
         if (!_followEnabled || catTransform == null || _playerHead == null) return;

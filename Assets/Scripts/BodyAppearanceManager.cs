@@ -10,7 +10,12 @@ public class BodyAppearanceManager : MonoBehaviour
     [SerializeField] private GameObject thinModel;
 
     [Header("判斷門檻（Weight >= 此值 → 胖體型）")]
-    [SerializeField] private int weightThreshold = 20;
+    [SerializeField] private int weightThreshold = 18;
+
+    [Header("語音")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip fatAudio;
+    [SerializeField] private AudioClip handsomeAudio;
 
     [Header("Debug — Play Mode 勾選即重新套用")]
     [SerializeField] private bool debugReapply;
@@ -39,9 +44,22 @@ public class BodyAppearanceManager : MonoBehaviour
         }
 
         bool isFat = bsm.Weight >= weightThreshold;
-        Debug.Log($"[BodyAppearanceManager] Weight={bsm.Weight}，門檻={weightThreshold} → {(isFat ? "胖體型" : "瘦體型")}");
+        Debug.Log($"[BodyAppearanceManager] Weight={bsm.Weight}，門檻={weightThreshold} → {(isFat ? "胖體型" : "帥體型")}");
 
         if (fatModel  != null) fatModel.SetActive(isFat);
         if (thinModel != null) thinModel.SetActive(!isFat);
+
+        PlayModelAudio(isFat);
+    }
+
+    private void PlayModelAudio(bool isFat)
+    {
+        if (audioSource == null) return;
+
+        AudioClip clip = isFat ? fatAudio : handsomeAudio;
+        if (clip == null) return;
+
+        audioSource.clip = clip;
+        audioSource.Play();
     }
 }

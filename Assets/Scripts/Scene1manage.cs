@@ -46,8 +46,8 @@ public class Scene1manage : MonoBehaviour
     public string momFinalYellText = ".";
 
     [Header("--- 場景轉移設定 ---")]
-    public Transform playerRig;                  
-    public Transform forestSpawnPoint;           
+    public Transform playerRig;
+    public Transform forestSpawnPoint;
 
     [Header("--- 雙門顯示控制 ---")]
     public GameObject firstDoor;                  // 初始顯示的第一個門
@@ -122,7 +122,7 @@ public class Scene1manage : MonoBehaviour
 
         Debug.Log("second stage");
         currentPhase = GamePhase.Phase2_Panic;
-        ceilingSinkSpeed = 0.05f;
+        ceilingSinkSpeed = 0.04f;
         textShootForce = 10f;
         lightFlickerSpeed = 0.15f;
 
@@ -268,7 +268,7 @@ IEnumerator EscapeSequenceCoroutine()
             playerRig.position = forestSpawnPoint.position;
             playerRig.rotation = forestSpawnPoint.rotation; 
 
-            if (cc != null) 
+            if (cc != null)
             {
                 cc.enabled = true;
             }

@@ -39,6 +39,8 @@ public class SwingLocomotion : MonoBehaviour
     private float _runtimeMaxSpeed;
     private float _runtimeDeadzone;
 
+    public bool IsWalking => _currentSpeed > 0.05f;
+
     // right controller Button A (Button.One) toggles locomotion on/off
     private bool _locomotionEnabled = true;
 
