@@ -195,13 +195,22 @@ public class GameProgressDoor : MonoBehaviour
             string sceneName = isCS ? csEndingSceneName : musicEndingSceneName;
             Debug.Log($"[GameProgressDoor] 全部完成 → 載入【{sceneName}】");
             _pendingTeleport = true;
-            SceneManager.LoadScene(sceneName);
+            StartCoroutine(LoadSceneAsync(sceneName));
         }
         else
         {
             Debug.Log($"[GameProgressDoor] 進度未滿 ({gm.CompletedEvents}/3)，普通的回家...");
             StartCoroutine(ResetLock());
         }
+    }
+
+    private IEnumerator LoadSceneAsync(string sceneName)
+    {
+        // 非同步載入：main thread 繼續渲染，GPU 不會因空轉超時而 TDR crash
+        // OnSceneLoaded 回呼仍然正常觸發，TeleportAfterLoad 不受影響
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
+        while (!asyncLoad.isDone)
+            yield return null;
     }
 
     private IEnumerator ResetLock()

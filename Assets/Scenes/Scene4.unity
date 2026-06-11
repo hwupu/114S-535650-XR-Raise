@@ -5181,7 +5181,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: fae46b07f78c1ab40bcde4e97f27ffc5,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: fae46b07f78c1ab40bcde4e97f27ffc5,
         type: 3}
@@ -7172,6 +7172,7 @@ MonoBehaviour:
   audioSource: {fileID: 1607129824}
   fatAudio: {fileID: 8300000, guid: 5c0dc30e44f81d7489f06c990ed6a84b, type: 3}
   handsomeAudio: {fileID: 8300000, guid: 1e84a2ebaa41dda46b8730c9777124e4, type: 3}
+  audioDelay: 3
   debugReapply: 0
 --- !u!4 &1607129823
 Transform:
@@ -8097,7 +8098,7 @@ PrefabInstance:
     - target: {fileID: 2950770442456443061, guid: d7dcb9d01e98b294a96a216cc1550a68,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2950770442456443061, guid: d7dcb9d01e98b294a96a216cc1550a68,
         type: 3}
@@ -9138,6 +9139,8 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 9065992480457225747, guid: cf178f1fce5b6fc419737c3201864d8b, type: 3}
+    - {fileID: 8409590572895470730, guid: cf178f1fce5b6fc419737c3201864d8b, type: 3}
+    - {fileID: 4300790533412329930, guid: cf178f1fce5b6fc419737c3201864d8b, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 1200023196244501507, guid: cf178f1fce5b6fc419737c3201864d8b,

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[RequireComponent(typeof(OVRCameraRig))]
+[RequireComponent(typeof(Rigidbody))]
 public class DumbbellExercise : MonoBehaviour
 {
     [Header("Exercise Detection")]
@@ -11,48 +11,47 @@ public class DumbbellExercise : MonoBehaviour
     [Header("Sound")]
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip   repSound;
+    [SerializeField] private AudioClip   completionSound;
 
     [Header("Debug")]
     [SerializeField] private bool enableDebugTrigger = true;
 
     public int CurrentReps { get; private set; }
 
-    private Transform _leftHand, _rightHand;
-    private float _leftPrevY, _rightPrevY;
+    private Rigidbody _rb;
+    private bool IsHeld => _rb != null && _rb.isKinematic;
+
+    private float _prevY;
 
     private enum Phase { Neutral, MovingUp, MovingDown }
     private Phase _phase;
 
     private void Awake()
     {
-        var rig = GetComponent<OVRCameraRig>();
-        _leftHand  = rig.leftHandAnchor;
-        _rightHand = rig.rightHandAnchor;
+        _rb = GetComponent<Rigidbody>();
     }
 
     private void Start()
     {
-        _leftPrevY  = _leftHand.position.y;
-        _rightPrevY = _rightHand.position.y;
+        _prevY = transform.position.y;
     }
 
     private void Update()
     {
         HandleDebugTrigger();
 
+        if (!IsHeld)
+        {
+            _prevY  = transform.position.y;
+            _phase  = Phase.Neutral;
+            return;
+        }
+
         float dt = Time.deltaTime;
+        float yVel = dt > 0f ? (transform.position.y - _prevY) / dt : 0f;
+        _prevY = transform.position.y;
 
-        // always update prevY — prevents velocity spike if detection starts mid-frame
-        float leftYVel  = dt > 0f ? (_leftHand.position.y  - _leftPrevY)  / dt : 0f;
-        float rightYVel = dt > 0f ? (_rightHand.position.y - _rightPrevY) / dt : 0f;
-        _leftPrevY  = _leftHand.position.y;
-        _rightPrevY = _rightHand.position.y;
-
-        float avgYVel = (leftYVel + rightYVel) * 0.5f;
-
-        // dumbbell motion: both hands co-phase (same vertical direction)
-        // count a rep each time hands complete a down-stroke then return up
-        if (avgYVel > upVelThreshold)
+        if (yVel > upVelThreshold)
         {
             if (_phase == Phase.MovingDown)
             {
@@ -62,14 +61,17 @@ public class DumbbellExercise : MonoBehaviour
             }
             _phase = Phase.MovingUp;
         }
-        else if (avgYVel < -downVelThreshold)
+        else if (yVel < -downVelThreshold)
         {
             _phase = Phase.MovingDown;
         }
 
         if (CurrentReps >= repsRequired)
         {
-            BodyShapeManager.Instance?.AddWeight(-1);
+            if (BodyShapeManager.Instance != null)
+                BodyShapeManager.Instance.AddWeight(-1);
+            if (audioSource != null && completionSound != null)
+                audioSource.PlayOneShot(completionSound);
             CurrentReps = 0;
             _phase = Phase.Neutral;
         }
@@ -80,9 +82,9 @@ public class DumbbellExercise : MonoBehaviour
         if (!enableDebugTrigger) return;
 #if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.Space))
-            BodyShapeManager.Instance?.AddWeight(3);
+            if (BodyShapeManager.Instance != null) BodyShapeManager.Instance.AddWeight(3);
 #endif
         if (OVRInput.GetDown(OVRInput.Button.Two, OVRInput.Controller.RTouch))
-            BodyShapeManager.Instance?.AddWeight(3);
+            if (BodyShapeManager.Instance != null) BodyShapeManager.Instance.AddWeight(3);
     }
 }

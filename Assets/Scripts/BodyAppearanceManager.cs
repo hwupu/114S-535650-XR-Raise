@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 // Attach to a manager GameObject in Scene3 and Scene4.
@@ -16,6 +17,7 @@ public class BodyAppearanceManager : MonoBehaviour
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip fatAudio;
     [SerializeField] private AudioClip handsomeAudio;
+    [SerializeField] private float audioDelay = 3f;
 
     [Header("Debug — Play Mode 勾選即重新套用")]
     [SerializeField] private bool debugReapply;
@@ -59,6 +61,12 @@ public class BodyAppearanceManager : MonoBehaviour
         AudioClip clip = isFat ? fatAudio : handsomeAudio;
         if (clip == null) return;
 
+        StartCoroutine(PlayAudioDelayed(clip));
+    }
+
+    private IEnumerator PlayAudioDelayed(AudioClip clip)
+    {
+        yield return new WaitForSeconds(audioDelay);
         audioSource.clip = clip;
         audioSource.Play();
     }

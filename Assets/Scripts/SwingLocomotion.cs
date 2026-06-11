@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
@@ -19,7 +20,8 @@ public class SwingLocomotion : MonoBehaviour
 
     [Header("Gravity")]
     [SerializeField] private float gravityMultiplier = 2.0f;
-    [SerializeField] private float stickToGroundForce = 2f;
+    [SerializeField] private float stickToGroundForce = 0.5f;
+    [SerializeField] private LayerMask groundLayer = ~0;
 
 #if UNITY_EDITOR
     [Header("── Debug Info (read-only) ──")]
@@ -44,7 +46,11 @@ public class SwingLocomotion : MonoBehaviour
     // right controller Button A (Button.One) toggles locomotion on/off
     private bool _locomotionEnabled = true;
 
-    // ── Debug 用：追蹤 isGrounded 狀態變化 ──
+    // ── Coyote time：CC.isGrounded 短暫 False 時仍視為接地 ──
+    private float _groundedTimer = 0f;
+    private const float GroundedGracePeriod = 0.15f;
+
+    // ── Debug 用：追蹤 effectivelyGrounded 狀態變化 ──
     private bool  _prevGrounded = true;
     private float _debugLogTimer = 0f;
 
@@ -60,11 +66,34 @@ public class SwingLocomotion : MonoBehaviour
         _runtimeDeadzone = deadzone;
     }
 
-    private void Start()
+    private IEnumerator Start()
     {
         _leftPrevPos  = _leftHand.position;
         _rightPrevPos = _rightHand.position;
         _prevRigPos   = transform.position;
+
+        // 在 yield 之前初始化：確保第一個 FixedUpdate 就有接地狀態，不會誤觸重力累積
+        _groundedTimer    = GroundedGracePeriod;
+        _verticalVelocity = -stickToGroundForce;
+
+        // 等一幀讓 OVR 完成初始化後再 snap，避免 OVR 覆蓋 snap 結果
+        yield return null;
+
+        // 場景載入時將 CC 貼地，消除啟動懸空下墜
+        // 從腳底稍上方往下射（0.1f），避免打到天花板
+        _cc.enabled = false;
+        float ccBottomOffset = _cc.center.y - _cc.height / 2f;
+        if (Physics.Raycast(transform.position + Vector3.up * 0.1f,
+                            Vector3.down, out RaycastHit hit, 5f,
+                            groundLayer, QueryTriggerInteraction.Ignore))
+        {
+            Vector3 pos = transform.position;
+            pos.y = hit.point.y - ccBottomOffset + _cc.skinWidth;
+            transform.position = pos;
+        }
+        _cc.enabled = true;
+        _verticalVelocity = -stickToGroundForce;
+        _groundedTimer = GroundedGracePeriod;
     }
 
     // Called by GameProgressDoor after teleport to clear residual gravity velocity
@@ -166,10 +195,17 @@ public class SwingLocomotion : MonoBehaviour
         if (headFwdFinal.sqrMagnitude < 0.001f) headFwdFinal = transform.forward;
         headFwdFinal.Normalize();
 
-        // 標準模式：下落時才 snap 到地面，上升中不重置
-        if (_cc.isGrounded && _verticalVelocity < 0f)
+        // Coyote time：CC.isGrounded 短暫 False（地形邊緣）時，保留 0.15s 接地狀態
+        if (_cc.isGrounded)
+            _groundedTimer = GroundedGracePeriod;
+        else if (_groundedTimer > 0f)
+            _groundedTimer -= dt;
+
+        bool effectivelyGrounded = _groundedTimer > 0f;
+
+        if (effectivelyGrounded)
             _verticalVelocity = -stickToGroundForce;
-        else if (!_cc.isGrounded)
+        else
             _verticalVelocity += Physics.gravity.y * gravityMultiplier * dt;
 
         _cc.Move(new Vector3(
@@ -177,17 +213,17 @@ public class SwingLocomotion : MonoBehaviour
             _verticalVelocity,
             headFwdFinal.z * _currentSpeed) * dt);
 
-        // ── Debug：isGrounded 狀態改變時 log，每 2 秒也輸出一次垂直速度 ──
-        if (_cc.isGrounded != _prevGrounded)
+        // ── Debug：effectivelyGrounded 狀態改變時 log，每 2 秒也輸出一次垂直速度 ──
+        if (effectivelyGrounded != _prevGrounded)
         {
-            Debug.Log($"[Swing-診斷] isGrounded 變為 {_cc.isGrounded}  vertVel={_verticalVelocity:F3}  pos={transform.position}");
-            _prevGrounded = _cc.isGrounded;
+            Debug.Log($"[Swing-診斷] effectivelyGrounded={effectivelyGrounded}  CC.isGrounded={_cc.isGrounded}  vertVel={_verticalVelocity:F3}  pos={transform.position}");
+            _prevGrounded = effectivelyGrounded;
         }
         _debugLogTimer += dt;
         if (_debugLogTimer >= 2f)
         {
             _debugLogTimer = 0f;
-            Debug.Log($"[Swing-診斷] isGrounded={_cc.isGrounded}  vertVel={_verticalVelocity:F3}  pos={transform.position}");
+            Debug.Log($"[Swing-診斷] effectivelyGrounded={effectivelyGrounded}  CC.isGrounded={_cc.isGrounded}  vertVel={_verticalVelocity:F3}  pos={transform.position}");
         }
     }
 

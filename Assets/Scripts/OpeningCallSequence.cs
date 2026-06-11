@@ -104,6 +104,10 @@ public class OpeningCallSequence : MonoBehaviour
             yield return null;
         }
         passthroughLayer.textureOpacity = 0f;
-        SceneManager.LoadScene(homeSceneName);
+
+        // 非同步載入：main thread 繼續渲染，GPU 不會因空轉超時而 TDR crash
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(homeSceneName);
+        while (!asyncLoad.isDone)
+            yield return null;
     }
 }
